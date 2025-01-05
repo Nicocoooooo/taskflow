@@ -73,7 +73,7 @@ const TaskCard = ({ task, onClick }: TaskCardProps) => {
             {/* Personnes assignées */}
             {task.people && task.people.length > 0 && (
                 <div className="mt-3 flex -space-x-2">
-                    {task.people.map((person, index) => (
+                    {task.people.map((person) => (
                         <div
                             key={person.id}
                             className="w-8 h-8 rounded-full bg-violet-100 border-2 border-white flex items-center justify-center"
