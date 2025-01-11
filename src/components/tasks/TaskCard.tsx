@@ -1,11 +1,18 @@
+// src/components/tasks/TaskCard.tsx
 import { Clock, Calendar, AlertCircle, Star } from 'lucide-react';
-import { Task, TaskPriority } from '../../features/tasks/types';
+import { Task, TaskPriority, TaskStatus } from '../../features/tasks/types';
 
 const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
     low: { bg: 'bg-green-100', text: 'text-green-800' },
     medium: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
     high: { bg: 'bg-orange-100', text: 'text-orange-800' },
     urgent: { bg: 'bg-red-100', text: 'text-red-800' }
+};
+
+const statusColors: Record<TaskStatus, string> = {
+    todo: 'bg-yellow-100',          // Plus visible que bg-yellow-50/50
+    in_progress: 'bg-blue-100',     // Plus visible que bg-blue-50/50
+    done: 'bg-emerald-100'          // Plus visible que bg-emerald-50/50
 };
 
 interface TaskCardProps {
@@ -15,6 +22,7 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, onClick }: TaskCardProps) => {
     const priorityStyle = priorityColors[task.priority];
+    const statusStyle = statusColors[task.status];
 
     const formatTime = (minutes: number): string => {
         const hours = Math.floor(minutes / 60);
@@ -25,7 +33,7 @@ const TaskCard = ({ task, onClick }: TaskCardProps) => {
     return (
         <div
             onClick={onClick}
-            className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+            className={`${statusStyle} rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer`}
         >
             {/* En-tête avec priorité et indicateurs */}
             <div className="flex items-center justify-between mb-3">
