@@ -24,6 +24,7 @@ export interface Task {
     is_urgent: boolean;
     is_important: boolean;
     category_id?: string;
+    category?: Category; // Ajout de la relation avec Category
     status: TaskStatus;
     notes?: string;
     created_at: Date;
