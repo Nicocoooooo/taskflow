@@ -1,22 +1,32 @@
 // src/pages/tasks/ListView.tsx
-import { useState, useEffect } from 'react';
-import { Task, TaskFormData } from '../../features/tasks/types';
-import { fetchTasks, createTask, updateTask } from '../../features/tasks/api';
+import { useState, useEffect, useMemo } from 'react';
+import { Task, TaskFormData, Category, TaskPriority, TaskStatus } from '../../features/tasks/types';
+import { fetchTasks, createTask, updateTask, fetchCategories } from '../../features/tasks/api';
 import TaskCard from '../../components/tasks/TaskCard';
 import Modal from '../../components/common/Modal';
 import TaskForm from '../../components/tasks/TaskForm';
+import TaskFilters from '../../components/tasks/TaskFilters';
 import { Plus, Search } from 'lucide-react';
 
 const ListView = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
+    const [filters, setFilters] = useState({
+        categories: [] as string[],
+        status: [] as TaskStatus[],
+        priority: [] as TaskPriority[],
+        sortBy: 'date' as 'date' | 'priority' | 'status' | 'name',
+        sortOrder: 'desc' as 'asc' | 'desc'
+    });
 
     useEffect(() => {
         loadTasks();
+        loadCategories();
     }, []);
 
     const loadTasks = async () => {
@@ -26,6 +36,13 @@ const ListView = () => {
             setTasks(data);
         }
         setIsLoading(false);
+    };
+
+    const loadCategories = async () => {
+        const { data } = await fetchCategories();
+        if (data) {
+            setCategories(data);
+        }
     };
 
     const handleTaskClick = (task: Task) => {
@@ -52,10 +69,52 @@ const ListView = () => {
         loadTasks();
     };
 
-    const filteredTasks = tasks.filter(task =>
-        task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredAndSortedTasks = useMemo(() => {
+        let filtered = tasks.filter(task => {
+            // Filtre par recherche
+            const matchesSearch =
+                task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+            // Filtre par catégorie
+            const matchesCategory = filters.categories.length === 0 ||
+                (task.category_id && filters.categories.includes(task.category_id));
+
+            // Filtre par statut
+            const matchesStatus = filters.status.length === 0 ||
+                filters.status.includes(task.status);
+
+            // Filtre par priorité
+            const matchesPriority = filters.priority.length === 0 ||
+                filters.priority.includes(task.priority);
+
+            return matchesSearch && matchesCategory && matchesStatus && matchesPriority;
+        });
+
+        // Tri
+        return [...filtered].sort((a, b) => {
+            let comparison = 0;
+            switch (filters.sortBy) {
+                case 'date':
+                    comparison = (a.due_date?.getTime() || 0) - (b.due_date?.getTime() || 0);
+                    break;
+                case 'priority': {
+                    const priorityOrder = { low: 0, medium: 1, high: 2, urgent: 3 };
+                    comparison = (priorityOrder[a.priority] || 0) - (priorityOrder[b.priority] || 0);
+                    break;
+                }
+                case 'status': {
+                    const statusOrder = { todo: 0, in_progress: 1, done: 2 };
+                    comparison = (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+                    break;
+                }
+                case 'name':
+                    comparison = a.name.localeCompare(b.name);
+                    break;
+            }
+            return filters.sortOrder === 'desc' ? -comparison : comparison;
+        });
+    }, [tasks, searchQuery, filters]);
 
     if (isLoading) {
         return <div className="flex justify-center items-center h-48">Chargement...</div>;
@@ -75,6 +134,13 @@ const ListView = () => {
                 </button>
             </div>
 
+            {/* Filtres */}
+            <TaskFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                categories={categories}
+            />
+
             {/* Barre de recherche */}
             <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -89,7 +155,7 @@ const ListView = () => {
 
             {/* Liste des tâches */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredTasks.map(task => (
+                {filteredAndSortedTasks.map(task => (
                     <div key={task.id} onClick={() => handleTaskClick(task)}>
                         <TaskCard task={task} />
                     </div>
