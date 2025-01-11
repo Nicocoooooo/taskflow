@@ -63,7 +63,6 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
-
                 {/* Test du TaskForm */}
                 <div className="mt-12">
                     <h2 className="text-xl mb-4">TaskForm</h2>
