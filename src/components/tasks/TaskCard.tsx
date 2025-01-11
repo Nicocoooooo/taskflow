@@ -55,6 +55,19 @@ const TaskCard = ({ task, onClick }: TaskCardProps) => {
                 {task.name}
             </h3>
 
+            {/* Catégorie */}
+            {task.category && (
+                <div
+                    className="inline-block px-2 py-1 mb-2 text-sm rounded-full"
+                    style={{
+                        backgroundColor: `${task.category.color}20`,
+                        color: task.category.color
+                    }}
+                >
+                    {task.category.name}
+                </div>
+            )}
+
             {/* Description (si présente) */}
             {task.description && (
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">

@@ -1,6 +1,7 @@
-import { FormEvent } from 'react';
-import { TaskFormData, TaskPriority, TaskStatus } from '../../features/tasks/types';
+import { FormEvent, useState, useEffect } from 'react';
+import { TaskFormData, TaskPriority, TaskStatus, Category } from '../../features/tasks/types';
 import { Button } from '../common/Button';
+import { fetchCategories } from '../../features/tasks/api';
 
 interface TaskFormProps {
     initialData?: TaskFormData;
@@ -9,6 +10,18 @@ interface TaskFormProps {
 }
 
 const TaskForm = ({ initialData, onSubmit, onCancel }: TaskFormProps) => {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            const { data } = await fetchCategories();
+            setCategories(data || []);
+            setCategoriesLoading(false);
+        };
+        loadCategories();
+    }, []);
+
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -21,6 +34,7 @@ const TaskForm = ({ initialData, onSubmit, onCancel }: TaskFormProps) => {
             priority: formData.get('priority') as TaskPriority,
             is_urgent: formData.get('is_urgent') === 'on',
             is_important: formData.get('is_important') === 'on',
+            category_id: formData.get('category_id') as string || undefined,
             status: formData.get('status') as TaskStatus,
             notes: formData.get('notes') as string,
         };
@@ -86,6 +100,30 @@ const TaskForm = ({ initialData, onSubmit, onCancel }: TaskFormProps) => {
                         className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500"
                     />
                 </div>
+            </div>
+
+            {/* Catégorie */}
+            <div>
+                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700">
+                    Catégorie
+                </label>
+                <select
+                    name="category_id"
+                    id="category_id"
+                    defaultValue={initialData?.category_id}
+                    className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500"
+                >
+                    <option value="">Aucune catégorie</option>
+                    {categories.map((category) => (
+                        <option
+                            key={category.id}
+                            value={category.id}
+                        >
+                            {category.name}
+                        </option>
+                    ))}
+                </select>
+                {categoriesLoading && <p className="mt-1 text-sm text-gray-500">Chargement des catégories...</p>}
             </div>
 
             {/* Priorité */}
