@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layouts/MainLayout';
 import DashboardPage from './pages/dashboard/index';
+import ListView from './pages/tasks/ListView';
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/tasks/list" element={<ListView />} />
         </Routes>
       </MainLayout>
     </Router>
