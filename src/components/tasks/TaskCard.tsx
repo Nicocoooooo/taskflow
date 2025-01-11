@@ -10,9 +10,9 @@ const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
 };
 
 const statusColors: Record<TaskStatus, string> = {
-    todo: 'bg-yellow-100',          // Plus visible que bg-yellow-50/50
-    in_progress: 'bg-blue-100',     // Plus visible que bg-blue-50/50
-    done: 'bg-emerald-100'          // Plus visible que bg-emerald-50/50
+    todo: 'bg-amber-100',          // Plus visible que bg-yellow-50/50
+    in_progress: 'bg-cyan-100',     // Plus visible que bg-blue-50/50
+    done: 'bg-green-100'          // Plus visible que bg-emerald-50/50
 };
 
 interface TaskCardProps {
