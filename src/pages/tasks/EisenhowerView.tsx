@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Task, TaskFormData } from '../../features/tasks/types';
-import { fetchTasks, createTask, updateTask } from '../../features/tasks/api';
+import { fetchTasks, createTask, updateTask, deleteTask } from '../../features/tasks/api';
 import MiniTaskCard from '../../components/tasks/MiniTaskCard';
 import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 import { Plus } from 'lucide-react';
 
@@ -10,6 +11,7 @@ const EisenhowerView: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedQuadrant, setSelectedQuadrant] = useState<{
         urgent: boolean;
@@ -44,6 +46,18 @@ const EisenhowerView: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    const handleDeleteClick = (task: Task) => {
+        setTaskToDelete(task);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (taskToDelete) {
+            await deleteTask(taskToDelete.id);
+            loadTasks();
+            setTaskToDelete(null);
+        }
+    };
+
     const handleSubmit = async (taskData: TaskFormData) => {
         if (selectedTask) {
             await updateTask(selectedTask.id, taskData);
@@ -73,11 +87,13 @@ const EisenhowerView: React.FC = () => {
         tasks,
         onTaskClick,
         onAddClick,
+        onDelete,
         bgColor,
     }: {
         tasks: Task[];
         onTaskClick: (task: Task) => void;
         onAddClick: () => void;
+        onDelete: (task: Task) => void;
         bgColor: string;
     }) => (
         <div className={`p-4 h-full ${bgColor}`}>
@@ -87,6 +103,7 @@ const EisenhowerView: React.FC = () => {
                         key={task.id}
                         task={task}
                         onClick={() => onTaskClick(task)}
+                        onDelete={onDelete}
                     />
                 ))}
             </div>
@@ -120,6 +137,7 @@ const EisenhowerView: React.FC = () => {
                         tasks={filterTasksByQuadrant(false, true)}
                         onTaskClick={handleTaskClick}
                         onAddClick={() => handleAddClick(false, true)}
+                        onDelete={handleDeleteClick}
                         bgColor="bg-orange-50/50"
                     />
                 </div>
@@ -135,6 +153,7 @@ const EisenhowerView: React.FC = () => {
                         tasks={filterTasksByQuadrant(true, true)}
                         onTaskClick={handleTaskClick}
                         onAddClick={() => handleAddClick(true, true)}
+                        onDelete={handleDeleteClick}
                         bgColor="bg-red-50/50"
                     />
                 </div>
@@ -150,6 +169,7 @@ const EisenhowerView: React.FC = () => {
                         tasks={filterTasksByQuadrant(false, false)}
                         onTaskClick={handleTaskClick}
                         onAddClick={() => handleAddClick(false, false)}
+                        onDelete={handleDeleteClick}
                         bgColor="bg-gray-50/50"
                     />
                 </div>
@@ -165,6 +185,7 @@ const EisenhowerView: React.FC = () => {
                         tasks={filterTasksByQuadrant(true, false)}
                         onTaskClick={handleTaskClick}
                         onAddClick={() => handleAddClick(true, false)}
+                        onDelete={handleDeleteClick}
                         bgColor="bg-green-50/50"
                     />
                 </div>
@@ -196,6 +217,14 @@ const EisenhowerView: React.FC = () => {
                     }}
                 />
             </Modal>
+
+            <ConfirmModal
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la tâche"
+                message={`Êtes-vous sûr de vouloir supprimer la tâche "${taskToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </div>
     );
 };

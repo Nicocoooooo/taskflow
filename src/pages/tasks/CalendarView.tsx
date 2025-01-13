@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { addWeeks, subWeeks } from 'date-fns';
 import { Task, TaskFormData, TaskPriority, TaskStatus } from '../../features/tasks/types';
-import { fetchTasks, createTask, updateTask } from '../../features/tasks/api';
+import { fetchTasks, createTask, updateTask, deleteTask } from '../../features/tasks/api';
 import CalendarHeader from '../../pages/tasks/CalendarHeader';
 import CalendarGrid from '../../pages/tasks/CalendarGrid';
 import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 
 const CalendarView: React.FC = () => {
@@ -13,6 +14,7 @@ const CalendarView: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
 
@@ -52,6 +54,18 @@ const CalendarView: React.FC = () => {
         setSelectedTask(task);
         setIsCreateMode(false);
         setIsModalOpen(true);
+    };
+
+    const handleDeleteClick = (task: Task) => {
+        setTaskToDelete(task);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (taskToDelete) {
+            await deleteTask(taskToDelete.id);
+            loadTasks();
+            setTaskToDelete(null);
+        }
     };
 
     const getInitialData = (): TaskFormData | undefined => {
@@ -106,6 +120,7 @@ const CalendarView: React.FC = () => {
                 tasks={tasks}
                 onDateClick={handleDateClick}
                 onTaskClick={handleTaskClick}
+                onTaskDelete={handleDeleteClick}
             />
 
             <Modal
@@ -127,6 +142,14 @@ const CalendarView: React.FC = () => {
                     }}
                 />
             </Modal>
+
+            <ConfirmModal
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la tâche"
+                message={`Êtes-vous sûr de vouloir supprimer la tâche "${taskToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </div>
     );
 };

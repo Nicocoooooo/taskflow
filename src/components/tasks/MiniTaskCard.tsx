@@ -1,4 +1,4 @@
-import { AlertCircle, Star } from 'lucide-react';
+import { AlertCircle, Star, Trash2 } from 'lucide-react';
 import { Task, TaskPriority } from '../../features/tasks/types';
 
 const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
@@ -11,16 +11,31 @@ const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
 interface MiniTaskCardProps {
     task: Task;
     onClick?: () => void;
+    onDelete?: (task: Task) => void;
 }
 
-const MiniTaskCard = ({ task, onClick }: MiniTaskCardProps) => {
+const MiniTaskCard = ({ task, onClick, onDelete }: MiniTaskCardProps) => {
     const priorityStyle = priorityColors[task.priority];
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete?.(task);
+    };
 
     return (
         <div
             onClick={onClick}
-            className="bg-white rounded-xl border border-gray-200 p-2 hover:shadow-sm transition-all cursor-pointer mb-1 group"
+            className="bg-white rounded-xl border border-gray-200 p-2 hover:shadow-sm transition-all cursor-pointer mb-1 group relative"
         >
+            {onDelete && (
+                <button
+                    onClick={handleDelete}
+                    className="absolute right-2 top-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 transition-all text-red-500"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </button>
+            )}
+
             <div className="flex items-center gap-2">
                 {/* Indicateurs */}
                 <div className="flex shrink-0 -space-x-1">

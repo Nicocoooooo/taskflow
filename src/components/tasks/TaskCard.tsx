@@ -1,5 +1,4 @@
-// src/components/tasks/TaskCard.tsx
-import { Clock, Calendar, AlertCircle, Star } from 'lucide-react';
+import { Clock, Calendar, AlertCircle, Star, Trash2 } from 'lucide-react';
 import { Task, TaskPriority, TaskStatus } from '../../features/tasks/types';
 
 const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
@@ -10,17 +9,18 @@ const priorityColors: Record<TaskPriority, { bg: string; text: string }> = {
 };
 
 const statusColors: Record<TaskStatus, string> = {
-    todo: 'bg-amber-100',          // Plus visible que bg-yellow-50/50
-    in_progress: 'bg-cyan-100',     // Plus visible que bg-blue-50/50
-    done: 'bg-green-100'          // Plus visible que bg-emerald-50/50
+    todo: 'bg-amber-100',
+    in_progress: 'bg-cyan-100',
+    done: 'bg-green-100'
 };
 
 interface TaskCardProps {
     task: Task;
     onClick?: () => void;
+    onDelete?: (task: Task) => void;
 }
 
-const TaskCard = ({ task, onClick }: TaskCardProps) => {
+const TaskCard = ({ task, onClick, onDelete }: TaskCardProps) => {
     const priorityStyle = priorityColors[task.priority];
     const statusStyle = statusColors[task.status];
 
@@ -30,17 +30,31 @@ const TaskCard = ({ task, onClick }: TaskCardProps) => {
         return `${hours}h${mins ? ` ${mins}m` : ''}`;
     };
 
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete?.(task);
+    };
+
     return (
         <div
             onClick={onClick}
-            className={`${statusStyle} rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer`}
+            className={`${statusStyle} rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer relative group`}
         >
+            {onDelete && (
+                <button
+                    onClick={handleDelete}
+                    className="absolute right-3 top-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 transition-all text-red-500 z-10"
+                >
+                    <Trash2 className="h-5 w-5" />
+                </button>
+            )}
+
             {/* En-tête avec priorité et indicateurs */}
             <div className="flex items-center justify-between mb-3">
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${priorityStyle.bg} ${priorityStyle.text}`}>
                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mr-8">
                     {task.is_urgent && (
                         <AlertCircle className="h-5 w-5 text-red-500" />
                     )}

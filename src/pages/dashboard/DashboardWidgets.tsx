@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Plus, Clock, AlertCircle } from 'lucide-react';
 import { Task, TaskFormData } from '../../features/tasks/types';
-import { fetchTasks, createTask, updateTask } from '../../features/tasks/api';
+import { fetchTasks, createTask, updateTask, deleteTask } from '../../features/tasks/api';
 import TaskCard from '../../components/tasks/TaskCard';
 import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 
 const DashboardWidgets = () => {
@@ -12,6 +13,7 @@ const DashboardWidgets = () => {
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     // Chargement initial des tâches
@@ -60,6 +62,19 @@ const DashboardWidgets = () => {
             loadTasks();
             setIsEditModalOpen(false);
             setSelectedTask(null);
+        }
+    };
+
+    // Gestion de la suppression
+    const handleDeleteClick = (task: Task) => {
+        setTaskToDelete(task);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (taskToDelete) {
+            await deleteTask(taskToDelete.id);
+            loadTasks();
+            setTaskToDelete(null);
         }
     };
 
@@ -137,7 +152,10 @@ const DashboardWidgets = () => {
                                     className="cursor-pointer transition-transform hover:scale-102"
                                 >
                                     <div className="bg-red-50 rounded-xl p-1">
-                                        <TaskCard task={task} />
+                                        <TaskCard
+                                            task={task}
+                                            onDelete={() => handleDeleteClick(task)}
+                                        />
                                     </div>
                                 </div>
                             ))}
@@ -163,7 +181,10 @@ const DashboardWidgets = () => {
                                     onClick={() => handleTaskClick(task)}
                                     className="cursor-pointer transition-transform hover:scale-102"
                                 >
-                                    <TaskCard task={task} />
+                                    <TaskCard
+                                        task={task}
+                                        onDelete={() => handleDeleteClick(task)}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -191,6 +212,15 @@ const DashboardWidgets = () => {
                     />
                 )}
             </Modal>
+
+            {/* Modal de confirmation de suppression */}
+            <ConfirmModal
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la tâche"
+                message={`Êtes-vous sûr de vouloir supprimer la tâche "${taskToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </>
     );
 };

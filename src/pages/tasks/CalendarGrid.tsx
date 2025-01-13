@@ -16,13 +16,15 @@ interface CalendarGridProps {
     tasks: Task[];
     onDateClick: (date: Date) => void;
     onTaskClick?: (task: Task) => void;
+    onTaskDelete?: (task: Task) => void;
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({
     currentDate,
     tasks,
     onDateClick,
-    onTaskClick
+    onTaskClick,
+    onTaskDelete
 }) => {
     // Obtenir les jours de la semaine actuelle
     const weekStart = startOfWeek(currentDate, { locale: fr });
@@ -104,6 +106,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                         key={task.id}
                                         task={task}
                                         onClick={() => onTaskClick?.(task)}
+                                        onDelete={onTaskDelete ? () => onTaskDelete(task) : undefined}
                                     />
                                 ))}
                             </div>
