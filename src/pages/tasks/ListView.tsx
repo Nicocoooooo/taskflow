@@ -1,9 +1,9 @@
-// src/pages/tasks/ListView.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { Task, TaskFormData, Category, TaskPriority, TaskStatus } from '../../features/tasks/types';
-import { fetchTasks, createTask, updateTask, fetchCategories } from '../../features/tasks/api';
+import { fetchTasks, createTask, updateTask, deleteTask, fetchCategories } from '../../features/tasks/api';
 import TaskCard from '../../components/tasks/TaskCard';
 import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 import TaskFilters from '../../components/tasks/TaskFilters';
 import { Plus, Search } from 'lucide-react';
@@ -14,6 +14,7 @@ const ListView = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
     const [filters, setFilters] = useState({
@@ -57,6 +58,18 @@ const ListView = () => {
         setIsModalOpen(true);
     };
 
+    const handleDeleteClick = (task: Task) => {
+        setTaskToDelete(task);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (taskToDelete) {
+            await deleteTask(taskToDelete.id);
+            loadTasks();
+            setTaskToDelete(null);
+        }
+    };
+
     const handleSubmit = async (taskData: TaskFormData) => {
         if (isCreateMode) {
             await createTask(taskData);
@@ -72,8 +85,7 @@ const ListView = () => {
     const filteredAndSortedTasks = useMemo(() => {
         let filtered = tasks.filter(task => {
             // Filtre par recherche
-            const matchesSearch =
-                task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            const matchesSearch = task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 task.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
             // Filtre par catégorie
@@ -156,9 +168,12 @@ const ListView = () => {
             {/* Liste des tâches */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredAndSortedTasks.map(task => (
-                    <div key={task.id} onClick={() => handleTaskClick(task)}>
-                        <TaskCard task={task} />
-                    </div>
+                    <TaskCard
+                        key={task.id}
+                        task={task}
+                        onClick={() => handleTaskClick(task)}
+                        onDelete={handleDeleteClick}
+                    />
                 ))}
             </div>
 
@@ -180,6 +195,15 @@ const ListView = () => {
                     }}
                 />
             </Modal>
+
+            {/* Modal de confirmation de suppression */}
+            <ConfirmModal
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la tâche"
+                message={`Êtes-vous sûr de vouloir supprimer la tâche "${taskToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </div>
     );
 };

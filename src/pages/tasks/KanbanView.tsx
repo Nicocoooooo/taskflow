@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Task, TaskFormData, TaskStatus, Category } from '../../features/tasks/types';
-import { fetchTasks, updateTask, createTask, fetchCategories } from '../../features/tasks/api';
+import { fetchTasks, updateTask, createTask, fetchCategories, deleteTask } from '../../features/tasks/api';
 import TaskCard from '../../components/tasks/TaskCard';
 import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 import KanbanFilters from '../../components/tasks/KanbanFilters';
 import { Plus } from 'lucide-react';
@@ -20,6 +21,7 @@ const KanbanView = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
 
@@ -47,6 +49,19 @@ const KanbanView = () => {
         setSelectedTask({ status, category_id: selectedCategory } as Task);
         setIsCreateMode(true);
         setIsModalOpen(true);
+    };
+
+    const handleDeleteClick = (task: Task) => {
+        setTaskToDelete(task);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (taskToDelete) {
+            await deleteTask(taskToDelete.id);
+            const { data } = await fetchTasks();
+            if (data) setTasks(data);
+            setTaskToDelete(null);
+        }
     };
 
     const handleSubmit = async (taskData: TaskFormData) => {
@@ -163,7 +178,10 @@ const KanbanView = () => {
                                                                 } cursor-grab active:cursor-grabbing`}
                                                             onClick={() => handleTaskClick(task)}
                                                         >
-                                                            <TaskCard task={task} />
+                                                            <TaskCard
+                                                                task={task}
+                                                                onDelete={() => handleDeleteClick(task)}
+                                                            />
                                                         </div>
                                                     )}
                                                 </Draggable>
@@ -196,6 +214,15 @@ const KanbanView = () => {
                     }}
                 />
             </Modal>
+
+            {/* Modal de confirmation de suppression */}
+            <ConfirmModal
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la tâche"
+                message={`Êtes-vous sûr de vouloir supprimer la tâche "${taskToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </div>
     );
 };
