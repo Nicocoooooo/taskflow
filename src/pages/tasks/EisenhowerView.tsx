@@ -62,9 +62,10 @@ const EisenhowerView: React.FC = () => {
         loadTasks();
     };
 
-    const QuadrantHeader = ({ title, color }: { title: string; color: string }) => (
+    const QuadrantHeader = ({ title, subtitle, color }: { title: string; subtitle: string; color: string }) => (
         <div className={`p-4 border-b ${color}`}>
-            <h3 className="font-semibold text-gray-900">{title}</h3>
+            <div className="font-medium text-sm text-gray-600 mb-1">{title}</div>
+            <h3 className="font-semibold text-xl text-gray-900">{subtitle}</h3>
         </div>
     );
 
@@ -108,24 +109,11 @@ const EisenhowerView: React.FC = () => {
             <h1 className="text-2xl font-semibold text-gray-900 mb-6">Matrice d'Eisenhower</h1>
 
             <div className="grid grid-cols-2 gap-4 h-[calc(100vh-200px)]">
-                {/* Urgent & Important */}
+                {/* Important & Non Urgent (2) - PLANIFIER */}
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
-                        title="Urgent & Important"
-                        color="border-red-200"
-                    />
-                    <QuadrantContent
-                        tasks={filterTasksByQuadrant(true, true)}
-                        onTaskClick={handleTaskClick}
-                        onAddClick={() => handleAddClick(true, true)}
-                        bgColor="bg-red-50/50"
-                    />
-                </div>
-
-                {/* Non Urgent & Important */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
-                    <QuadrantHeader
-                        title="Important & Non Urgent"
+                        title="Important mais pas urgent (2)"
+                        subtitle="PLANIFIER"
                         color="border-orange-200"
                     />
                     <QuadrantContent
@@ -136,30 +124,47 @@ const EisenhowerView: React.FC = () => {
                     />
                 </div>
 
-                {/* Urgent & Non Important */}
+                {/* Urgent & Important (1) - FAIRE */}
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
-                        title="Urgent & Non Important"
-                        color="border-yellow-200"
+                        title="Urgent et important (1)"
+                        subtitle="FAIRE"
+                        color="border-red-200"
                     />
                     <QuadrantContent
-                        tasks={filterTasksByQuadrant(true, false)}
+                        tasks={filterTasksByQuadrant(true, true)}
                         onTaskClick={handleTaskClick}
-                        onAddClick={() => handleAddClick(true, false)}
-                        bgColor="bg-yellow-50/50"
+                        onAddClick={() => handleAddClick(true, true)}
+                        bgColor="bg-red-50/50"
                     />
                 </div>
 
-                {/* Non Urgent & Non Important */}
+                {/* Non Urgent & Non Important (4) - ÉLIMINER */}
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
-                        title="Non Urgent & Non Important"
-                        color="border-green-200"
+                        title="Ni urgent ni important (4)"
+                        subtitle="ÉLIMINER"
+                        color="border-gray-200"
                     />
                     <QuadrantContent
                         tasks={filterTasksByQuadrant(false, false)}
                         onTaskClick={handleTaskClick}
                         onAddClick={() => handleAddClick(false, false)}
+                        bgColor="bg-gray-50/50"
+                    />
+                </div>
+
+                {/* Urgent & Non Important (3) - DÉLÉGUER */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                    <QuadrantHeader
+                        title="Urgent mais pas important (3)"
+                        subtitle="DÉLÉGUER"
+                        color="border-green-200"
+                    />
+                    <QuadrantContent
+                        tasks={filterTasksByQuadrant(true, false)}
+                        onTaskClick={handleTaskClick}
+                        onAddClick={() => handleAddClick(true, false)}
                         bgColor="bg-green-50/50"
                     />
                 </div>
