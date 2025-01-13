@@ -1,0 +1,134 @@
+import React, { useState, useEffect } from 'react';
+import { addWeeks, subWeeks } from 'date-fns';
+import { Task, TaskFormData, TaskPriority, TaskStatus } from '../../features/tasks/types';
+import { fetchTasks, createTask, updateTask } from '../../features/tasks/api';
+import CalendarHeader from '../../pages/tasks/CalendarHeader';
+import CalendarGrid from '../../pages/tasks/CalendarGrid';
+import Modal from '../../components/common/Modal';
+import TaskForm from '../../components/tasks/TaskForm';
+
+const CalendarView: React.FC = () => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateMode, setIsCreateMode] = useState(false);
+
+    useEffect(() => {
+        loadTasks();
+    }, []);
+
+    const loadTasks = async () => {
+        setIsLoading(true);
+        const { data } = await fetchTasks();
+        if (data) {
+            setTasks(data);
+        }
+        setIsLoading(false);
+    };
+
+    const handlePreviousWeek = () => {
+        setCurrentDate(prev => subWeeks(prev, 1));
+    };
+
+    const handleNextWeek = () => {
+        setCurrentDate(prev => addWeeks(prev, 1));
+    };
+
+    const handleThisWeek = () => {
+        setCurrentDate(new Date());
+    };
+
+    const handleDateClick = (date: Date) => {
+        setSelectedDate(date);
+        setIsCreateMode(true);
+        setSelectedTask(null);
+        setIsModalOpen(true);
+    };
+
+    const handleTaskClick = (task: Task) => {
+        setSelectedTask(task);
+        setIsCreateMode(false);
+        setIsModalOpen(true);
+    };
+
+    const getInitialData = (): TaskFormData | undefined => {
+        if (selectedTask) {
+            return selectedTask;
+        }
+        if (selectedDate) {
+            return {
+                name: '',
+                description: '',
+                due_date: selectedDate,
+                estimated_time: undefined,
+                priority: 'medium' as TaskPriority,
+                is_urgent: false,
+                is_important: false,
+                category_id: undefined,
+                status: 'todo' as TaskStatus,
+                notes: ''
+            };
+        }
+        return undefined;
+    };
+
+    const handleSubmit = async (taskData: TaskFormData) => {
+        if (isCreateMode) {
+            await createTask(taskData);
+        } else if (selectedTask) {
+            await updateTask(selectedTask.id, taskData);
+        }
+
+        setIsModalOpen(false);
+        setSelectedTask(null);
+        setSelectedDate(null);
+        loadTasks();
+    };
+
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-48">Chargement...</div>;
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <CalendarHeader
+                currentDate={currentDate}
+                onPreviousWeek={handlePreviousWeek}
+                onNextWeek={handleNextWeek}
+                onThisWeek={handleThisWeek}
+            />
+
+            <CalendarGrid
+                currentDate={currentDate}
+                tasks={tasks}
+                onDateClick={handleDateClick}
+                onTaskClick={handleTaskClick}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedTask(null);
+                    setSelectedDate(null);
+                }}
+                title={isCreateMode ? "Nouvelle tâche" : "Modifier la tâche"}
+            >
+                <TaskForm
+                    initialData={getInitialData()}
+                    onSubmit={handleSubmit}
+                    onCancel={() => {
+                        setIsModalOpen(false);
+                        setSelectedTask(null);
+                        setSelectedDate(null);
+                    }}
+                />
+            </Modal>
+        </div>
+    );
+};
+
+export default CalendarView;
