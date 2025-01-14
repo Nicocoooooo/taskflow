@@ -5,6 +5,7 @@ import ListView from './pages/tasks/ListView';
 import KanbanView from './pages/tasks/KanbanView';
 import CalendarView from './pages/tasks/CalendarView';
 import EisenhowerView from './pages/tasks/EisenhowerView';
+import ObjectivesPage from './pages/objectives/index';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/tasks/kanban" element={<KanbanView />} />
           <Route path="/tasks/calendar" element={<CalendarView />} />
           <Route path="/tasks/matrix" element={<EisenhowerView />} />
+          <Route path="/objectives" element={<ObjectivesPage />} />
         </Routes>
       </MainLayout>
     </Router>

@@ -53,7 +53,10 @@ const Sidebar = () => {
     const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 
     const isCurrentPath = (path: string) => {
-        return location.pathname === path;
+        if (path === '/') {
+            return location.pathname === path;
+        }
+        return location.pathname.startsWith(path);
     };
 
     const toggleSubmenu = (name: string) => {
@@ -72,16 +75,29 @@ const Sidebar = () => {
 
                         return (
                             <div key={item.name}>
-                                <button
-                                    onClick={() => hasChildren ? toggleSubmenu(item.name) : null}
-                                    className={`
-                    w-full flex items-center px-3 py-2 text-sm rounded-xl
-                    ${isActive ? 'bg-violet-50 text-violet-600' : 'text-gray-700 hover:bg-gray-50'}
-                  `}
-                                >
-                                    <IconComponent className="h-5 w-5 mr-3" />
-                                    <span>{item.name}</span>
-                                </button>
+                                {hasChildren ? (
+                                    <button
+                                        onClick={() => toggleSubmenu(item.name)}
+                                        className={`
+                                            w-full flex items-center px-3 py-2 text-sm rounded-xl
+                                            ${isActive ? 'bg-violet-50 text-violet-600' : 'text-gray-700 hover:bg-gray-50'}
+                                        `}
+                                    >
+                                        <IconComponent className="h-5 w-5 mr-3" />
+                                        <span>{item.name}</span>
+                                    </button>
+                                ) : (
+                                    <Link
+                                        to={item.path}
+                                        className={`
+                                            w-full flex items-center px-3 py-2 text-sm rounded-xl
+                                            ${isActive ? 'bg-violet-50 text-violet-600' : 'text-gray-700 hover:bg-gray-50'}
+                                        `}
+                                    >
+                                        <IconComponent className="h-5 w-5 mr-3" />
+                                        <span>{item.name}</span>
+                                    </Link>
+                                )}
 
                                 {/* Sous-menu */}
                                 {hasChildren && isOpen && (
@@ -91,9 +107,9 @@ const Sidebar = () => {
                                                 key={child.path}
                                                 to={child.path}
                                                 className={`
-                          block px-3 py-2 text-sm rounded-xl
-                          ${isCurrentPath(child.path) ? 'text-violet-600' : 'text-gray-600 hover:text-gray-900'}
-                        `}
+                                                    block px-3 py-2 text-sm rounded-xl
+                                                    ${isCurrentPath(child.path) ? 'text-violet-600' : 'text-gray-600 hover:text-gray-900'}
+                                                `}
                                             >
                                                 {child.name}
                                             </Link>
