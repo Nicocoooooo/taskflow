@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import ObjectiveCard from '../../components/objectives/ObjectiveCard';
-import ObjectiveForm from '../../components/objectives/ObjectiveForm';
+import EnhancedObjectiveForm from '../../components/objectives/EnhancedObjectiveForm';
 import { Objective } from '../../features/objectives/types';
 import { objectivesApi } from '../../features/objectives/api';
+import { CreateEnhancedObjectiveDto, EnhancedObjective } from '../../features/objectives/enhanced-types';
+import { Category, categoriesApi } from '../../features/categories/api';
 
 const ObjectivesPage = () => {
     const [objectives, setObjectives] = useState<Objective[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
-    const [editingObjective, setEditingObjective] = useState<Objective | undefined>(undefined);
+    const [editingObjective, setEditingObjective] = useState<EnhancedObjective | undefined>(undefined);
 
     const fetchObjectives = async () => {
         try {
@@ -24,8 +27,17 @@ const ObjectivesPage = () => {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const data = await categoriesApi.fetchAll();
+            setCategories(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+        }
+    };
+
     useEffect(() => {
-        fetchObjectives();
+        Promise.all([fetchObjectives(), fetchCategories()]);
     }, []);
 
     const handleFormClose = () => {
@@ -33,13 +45,63 @@ const ObjectivesPage = () => {
         setEditingObjective(undefined);
     };
 
-    const handleFormSubmit = () => {
-        handleFormClose();
-        fetchObjectives();
+    const handleFormSubmit = async (data: CreateEnhancedObjectiveDto) => {
+        try {
+            if (editingObjective) {
+                await objectivesApi.update(editingObjective.id, {
+                    title: data.title,
+                    description: data.description ?? undefined,
+                    type: data.type,
+                    due_date: data.due_date ?? undefined,
+                    category_id: data.domain_id ?? undefined,
+                    status: editingObjective.status,
+                    progress: editingObjective.progress
+                });
+            } else {
+                await objectivesApi.create({
+                    title: data.title,
+                    description: data.description ?? undefined,
+                    type: data.type,
+                    due_date: data.due_date ?? undefined,
+                    category_id: data.domain_id ?? undefined
+                });
+            }
+            handleFormClose();
+            fetchObjectives();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+        }
     };
 
     const handleEdit = (objective: Objective) => {
-        setEditingObjective(objective);
+        const enhancedObjective: EnhancedObjective = {
+            id: objective.id,
+            title: objective.title,
+            description: objective.description ?? undefined,
+            due_date: objective.due_date ?? undefined,
+            type: objective.type,
+            status: objective.status,
+            progress: objective.progress,
+            domain_id: objective.category_id ?? undefined,
+            category_id: objective.category_id ?? undefined,
+            created_at: objective.created_at,
+            priority: 1,
+            smart_specific: '',
+            smart_measurable: '',
+            smart_achievable: '',
+            smart_realistic: '',
+            target_value: 0,
+            measurement_unit: '',
+            kpis: [],
+            milestones: [],
+            notes: objective.notes ?? undefined,
+            steps: objective.steps ?? [],
+            linked_tasks: objective.linked_tasks?.map(id => ({
+                task_id: id,
+                impact_weight: 1
+            })) ?? []
+        };
+        setEditingObjective(enhancedObjective);
         setShowForm(true);
     };
 
@@ -72,10 +134,11 @@ const ObjectivesPage = () => {
 
             {showForm && (
                 <div className="mb-6">
-                    <ObjectiveForm
+                    <EnhancedObjectiveForm
                         objective={editingObjective}
                         onSubmit={handleFormSubmit}
                         onCancel={handleFormClose}
+                        domains={categories}
                     />
                 </div>
             )}
