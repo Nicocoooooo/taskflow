@@ -1,8 +1,6 @@
-// Types d'objectifs
 export type ObjectiveType = 'short_term' | 'medium_term' | 'long_term';
 export type ObjectiveStatus = 'not_started' | 'in_progress' | 'completed';
 
-// Structure d'une étape d'objectif
 export interface ObjectiveStep {
     id: number;
     objective_id: number;
@@ -13,7 +11,7 @@ export interface ObjectiveStep {
     completed_at: string | null;
 }
 
-// Structure principale d'un objectif
+// Interface principale de l'objectif avec les champs SMART
 export interface Objective {
     id: number;
     title: string;
@@ -25,11 +23,22 @@ export interface Objective {
     progress: number;
     notes: string | null;
     created_at: string;
+
+    // Champs SMART
+    smart_specific: string | null;
+    smart_measurable: string | null;
+    smart_achievable: string | null;
+    smart_realistic: string | null;
+    target_value: number | null;
+    measurement_unit: string | null;
+    priority: number;
+
+    // Relations
     steps?: ObjectiveStep[];
-    linked_tasks?: number[]; // IDs des tâches liées
+    linked_tasks?: number[];
 }
 
-// Interface pour la création d'un objectif
+// Interface pour la création avec les champs SMART
 export interface CreateObjectiveDto {
     title: string;
     description?: string;
@@ -38,9 +47,17 @@ export interface CreateObjectiveDto {
     type: ObjectiveType;
     notes?: string;
     steps?: CreateObjectiveStepDto[];
+
+    // Champs SMART
+    smart_specific: string;
+    smart_measurable: string;
+    smart_achievable: string;
+    smart_realistic: string;
+    target_value: number;
+    measurement_unit: string;
+    priority: number;
 }
 
-// Interface pour la mise à jour d'un objectif
 export interface UpdateObjectiveDto {
     title?: string;
     description?: string;
@@ -50,16 +67,23 @@ export interface UpdateObjectiveDto {
     status?: ObjectiveStatus;
     progress?: number;
     notes?: string;
+
+    // Champs SMART
+    smart_specific?: string;
+    smart_measurable?: string;
+    smart_achievable?: string;
+    smart_realistic?: string;
+    target_value?: number;
+    measurement_unit?: string;
+    priority?: number;
 }
 
-// Interface pour la création d'une étape
 export interface CreateObjectiveStepDto {
     title: string;
     description?: string;
     order_index: number;
 }
 
-// Interface pour la mise à jour d'une étape
 export interface UpdateObjectiveStepDto {
     title?: string;
     description?: string;

@@ -1,12 +1,15 @@
 import { supabase } from '../../lib/supabase';
 import {
-    Objective,
-    CreateObjectiveDto,
-    UpdateObjectiveDto,
     ObjectiveStep,
     CreateObjectiveStepDto,
+    UpdateObjectiveDto,
     UpdateObjectiveStepDto,
 } from './types';
+
+import {
+    CreateEnhancedObjectiveDto,
+    EnhancedObjective
+} from './enhanced-types';
 
 // Fonctions utilitaires
 const calculateProgress = (steps: ObjectiveStep[]): number => {
@@ -18,12 +21,14 @@ const calculateProgress = (steps: ObjectiveStep[]): number => {
 // API Objectives
 export const objectivesApi = {
     // Récupérer tous les objectifs avec leurs étapes
-    async fetchAll(): Promise<Objective[]> {
+    async fetchAll(): Promise<EnhancedObjective[]> {
         const { data: objectives, error } = await supabase
             .from('objectives')
             .select(`
                 *,
-                steps:objective_steps(*)
+                steps:objective_steps(*),
+                linked_tasks:objective_tasks(task_id),
+                domain:life_domains(*)
             `)
             .order('created_at', { ascending: false });
 
@@ -32,13 +37,14 @@ export const objectivesApi = {
     },
 
     // Récupérer un objectif par ID
-    async fetchById(id: number): Promise<Objective | null> {
+    async fetchById(id: number): Promise<EnhancedObjective | null> {
         const { data, error } = await supabase
             .from('objectives')
             .select(`
                 *,
                 steps:objective_steps(*),
-                linked_tasks:objective_tasks(task_id)
+                linked_tasks:objective_tasks(task_id),
+                domain:life_domains(*)
             `)
             .eq('id', id)
             .single();
@@ -47,47 +53,70 @@ export const objectivesApi = {
         return data;
     },
 
-    // Créer un nouvel objectif
-    async create(dto: CreateObjectiveDto): Promise<Objective> {
-        // Séparer les étapes du reste des données
-        const { steps, ...objectiveData } = dto;
+    // Créer un nouvel objectif avec les champs SMART
+    async create(dto: CreateEnhancedObjectiveDto): Promise<EnhancedObjective> {
+        // Séparer les steps des autres données
+        const { steps, ...restData } = dto;
 
-        // 1. Créer l'objectif
+        // Créer l'objectif en passant directement toutes les données nécessaires
         const { data: objective, error } = await supabase
             .from('objectives')
             .insert([{
-                ...objectiveData,
+                title: restData.title,
+                description: restData.description,
+                due_date: restData.due_date,
+                type: restData.type,
+                domain_id: restData.domain_id,
                 status: 'not_started',
-                progress: 0
+                progress: 0,
+                priority: restData.priority,
+                smart_specific: restData.smart_specific,
+                smart_measurable: restData.smart_measurable,
+                smart_achievable: restData.smart_achievable,
+                smart_realistic: restData.smart_realistic,
+                target_value: restData.target_value,
+                measurement_unit: restData.measurement_unit,
+                current_value: 0  // Initialiser la valeur courante à 0
             }])
-            .select()
+            .select(`
+                *,
+                steps:objective_steps(*),
+                domain:life_domains(*)
+            `)
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) {
+            console.error("Erreur lors de la création de l'objectif:", error);
+            throw new Error(error.message);
+        }
 
-        // 2. Si des étapes sont fournies, les créer
+        // Créer les étapes si nécessaire
         if (steps && steps.length > 0) {
             const { error: stepsError } = await supabase
                 .from('objective_steps')
                 .insert(
-                    steps.map((step, index) => ({
+                    steps.map((step: CreateObjectiveStepDto, index: number) => ({
+                        objective_id: objective.id,
                         title: step.title,
                         description: step.description,
                         order_index: index,
-                        objective_id: objective.id,
                         is_completed: false
                     }))
                 );
 
-            if (stepsError) throw new Error(stepsError.message);
+            if (stepsError) {
+                console.error("Erreur lors de la création des étapes:", stepsError);
+                throw new Error(stepsError.message);
+            }
         }
 
-        // 3. Récupérer l'objectif complet avec ses étapes
+        // Récupérer l'objectif complet avec toutes ses relations
         const { data: finalObjective, error: fetchError } = await supabase
             .from('objectives')
             .select(`
                 *,
-                steps:objective_steps(*)
+                steps:objective_steps(*),
+                domain:life_domains(*)
             `)
             .eq('id', objective.id)
             .single();
@@ -97,20 +126,46 @@ export const objectivesApi = {
     },
 
     // Mettre à jour un objectif
-    async update(id: number, dto: UpdateObjectiveDto): Promise<Objective> {
+    async update(id: number, dto: UpdateObjectiveDto): Promise<EnhancedObjective> {
+        // Mise à jour de l'objectif avec tous les champs possibles
         const { data, error } = await supabase
             .from('objectives')
-            .update(dto)
+            .update({
+                ...dto,
+                // Si le status passe à 'completed', mettre à jour la date de complétion
+                ...(dto.status === 'completed' ? { completed_at: new Date().toISOString() } : {})
+            })
             .eq('id', id)
-            .select()
+            .select(`
+                *,
+                steps:objective_steps(*),
+                domain:life_domains(*)
+            `)
             .single();
 
         if (error) throw new Error(error.message);
         return data;
     },
 
-    // Supprimer un objectif
+    // Supprimer un objectif et toutes ses relations
     async delete(id: number): Promise<void> {
+        // 1. Supprimer les étapes
+        const { error: stepsError } = await supabase
+            .from('objective_steps')
+            .delete()
+            .eq('objective_id', id);
+
+        if (stepsError) throw new Error(stepsError.message);
+
+        // 2. Supprimer les liens avec les tâches
+        const { error: tasksError } = await supabase
+            .from('objective_tasks')
+            .delete()
+            .eq('objective_id', id);
+
+        if (tasksError) throw new Error(tasksError.message);
+
+        // 3. Supprimer l'objectif
         const { error } = await supabase
             .from('objectives')
             .delete()
@@ -123,7 +178,9 @@ export const objectivesApi = {
     async linkTask(objectiveId: number, taskId: number): Promise<void> {
         const { error } = await supabase
             .from('objective_tasks')
-            .insert([{ objective_id: objectiveId, task_id: taskId }]);
+            .insert([{ objective_id: objectiveId, task_id: taskId }])
+            .select()
+            .single();
 
         if (error) throw new Error(error.message);
     },
@@ -134,6 +191,25 @@ export const objectivesApi = {
             .from('objective_tasks')
             .delete()
             .match({ objective_id: objectiveId, task_id: taskId });
+
+        if (error) throw new Error(error.message);
+    },
+
+    // Mettre à jour le progrès d'un objectif
+    async updateProgress(id: number): Promise<void> {
+        const { data: steps, error: stepsError } = await supabase
+            .from('objective_steps')
+            .select('*')
+            .eq('objective_id', id);
+
+        if (stepsError) throw new Error(stepsError.message);
+
+        const progress = calculateProgress(steps || []);
+
+        const { error } = await supabase
+            .from('objectives')
+            .update({ progress })
+            .eq('id', id);
 
         if (error) throw new Error(error.message);
     }
@@ -156,62 +232,75 @@ export const objectiveStepsApi = {
         if (error) throw new Error(error.message);
 
         // Mettre à jour le progrès de l'objectif
-        const { data: steps } = await supabase
-            .from('objective_steps')
-            .select('*')
-            .eq('objective_id', objectiveId);
-
-        if (steps) {
-            await objectivesApi.update(objectiveId, {
-                progress: calculateProgress(steps)
-            });
-        }
+        await objectivesApi.updateProgress(objectiveId);
 
         return data;
     },
 
     // Mettre à jour une étape
     async update(id: number, dto: UpdateObjectiveStepDto): Promise<ObjectiveStep> {
+        // 1. Récupérer l'objective_id avant la mise à jour
+        const { data: currentStep, error: fetchError } = await supabase
+            .from('objective_steps')
+            .select('objective_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) throw new Error(fetchError.message);
+
+        // 2. Mettre à jour l'étape
         const { data, error } = await supabase
             .from('objective_steps')
-            .update(dto)
+            .update({
+                ...dto,
+                // Si l'étape est marquée comme complétée, ajouter la date
+                ...(dto.is_completed ? { completed_at: new Date().toISOString() } : {})
+            })
             .eq('id', id)
             .select()
             .single();
 
         if (error) throw new Error(error.message);
 
-        // Si le statut de complétion a changé, mettre à jour le progrès de l'objectif
-        if (dto.is_completed !== undefined) {
-            const { data: step } = await supabase
-                .from('objective_steps')
-                .select('objective_id')
-                .eq('id', id)
-                .single();
-
-            if (step) {
-                const { data: steps } = await supabase
-                    .from('objective_steps')
-                    .select('*')
-                    .eq('objective_id', step.objective_id);
-
-                if (steps) {
-                    await objectivesApi.update(step.objective_id, {
-                        progress: calculateProgress(steps)
-                    });
-                }
-            }
-        }
+        // 3. Mettre à jour le progrès de l'objectif parent
+        await objectivesApi.updateProgress(currentStep.objective_id);
 
         return data;
     },
 
     // Supprimer une étape
     async delete(id: number): Promise<void> {
+        // 1. Récupérer l'objective_id avant la suppression
+        const { data: step, error: fetchError } = await supabase
+            .from('objective_steps')
+            .select('objective_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) throw new Error(fetchError.message);
+
+        // 2. Supprimer l'étape
         const { error } = await supabase
             .from('objective_steps')
             .delete()
             .eq('id', id);
+
+        if (error) throw new Error(error.message);
+
+        // 3. Mettre à jour le progrès de l'objectif parent
+        await objectivesApi.updateProgress(step.objective_id);
+    },
+
+    // Réordonner les étapes
+    async reorder(steps: { id: number; order_index: number }[]): Promise<void> {
+        const { error } = await supabase
+            .from('objective_steps')
+            .upsert(
+                steps.map(step => ({
+                    id: step.id,
+                    order_index: step.order_index
+                }))
+            );
 
         if (error) throw new Error(error.message);
     }

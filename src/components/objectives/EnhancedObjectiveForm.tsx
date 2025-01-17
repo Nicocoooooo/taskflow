@@ -97,6 +97,8 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
         setIsLoading(true);
         setError(null);
 
+        console.log("Données envoyées au serveur:", formData);
+
         try {
             await onSubmit(formData);
         } catch (err) {

@@ -3,14 +3,13 @@ import { Plus } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import ObjectiveCard from '../../components/objectives/ObjectiveCard';
 import EnhancedObjectiveForm from '../../components/objectives/EnhancedObjectiveForm';
-import { Objective } from '../../features/objectives/types';
 import { objectivesApi } from '../../features/objectives/api';
-import { CreateEnhancedObjectiveDto, EnhancedObjective } from '../../features/objectives/enhanced-types';
-import { Category, categoriesApi } from '../../features/categories/api';
+import { CreateEnhancedObjectiveDto, EnhancedObjective, LifeDomain } from '../../features/objectives/enhanced-types';
+import { lifeDomainsApi } from '../../features/life-domains/api';
 
 const ObjectivesPage = () => {
-    const [objectives, setObjectives] = useState<Objective[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [objectives, setObjectives] = useState<EnhancedObjective[]>([]);
+    const [domains, setDomains] = useState<LifeDomain[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -27,17 +26,17 @@ const ObjectivesPage = () => {
         }
     };
 
-    const fetchCategories = async () => {
+    const fetchDomains = async () => {
         try {
-            const data = await categoriesApi.fetchAll();
-            setCategories(data);
+            const data = await lifeDomainsApi.fetchAll();
+            setDomains(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         }
     };
 
     useEffect(() => {
-        Promise.all([fetchObjectives(), fetchCategories()]);
+        Promise.all([fetchObjectives(), fetchDomains()]);
     }, []);
 
     const handleFormClose = () => {
@@ -51,20 +50,19 @@ const ObjectivesPage = () => {
                 await objectivesApi.update(editingObjective.id, {
                     title: data.title,
                     description: data.description ?? undefined,
-                    type: data.type,
                     due_date: data.due_date ?? undefined,
                     category_id: data.domain_id ?? undefined,
-                    status: editingObjective.status,
-                    progress: editingObjective.progress
+                    type: data.type,
+                    smart_specific: data.smart_specific ?? undefined,
+                    smart_measurable: data.smart_measurable ?? undefined,
+                    smart_achievable: data.smart_achievable ?? undefined,
+                    smart_realistic: data.smart_realistic ?? undefined,
+                    target_value: data.target_value ?? undefined,
+                    measurement_unit: data.measurement_unit ?? undefined,
+                    priority: data.priority
                 });
             } else {
-                await objectivesApi.create({
-                    title: data.title,
-                    description: data.description ?? undefined,
-                    type: data.type,
-                    due_date: data.due_date ?? undefined,
-                    category_id: data.domain_id ?? undefined
-                });
+                await objectivesApi.create(data);
             }
             handleFormClose();
             fetchObjectives();
@@ -73,35 +71,8 @@ const ObjectivesPage = () => {
         }
     };
 
-    const handleEdit = (objective: Objective) => {
-        const enhancedObjective: EnhancedObjective = {
-            id: objective.id,
-            title: objective.title,
-            description: objective.description ?? undefined,
-            due_date: objective.due_date ?? undefined,
-            type: objective.type,
-            status: objective.status,
-            progress: objective.progress,
-            domain_id: objective.category_id ?? undefined,
-            category_id: objective.category_id ?? undefined,
-            created_at: objective.created_at,
-            priority: 1,
-            smart_specific: '',
-            smart_measurable: '',
-            smart_achievable: '',
-            smart_realistic: '',
-            target_value: 0,
-            measurement_unit: '',
-            kpis: [],
-            milestones: [],
-            notes: objective.notes ?? undefined,
-            steps: objective.steps ?? [],
-            linked_tasks: objective.linked_tasks?.map(id => ({
-                task_id: id,
-                impact_weight: 1
-            })) ?? []
-        };
-        setEditingObjective(enhancedObjective);
+    const handleEdit = (objective: EnhancedObjective) => {
+        setEditingObjective(objective);
         setShowForm(true);
     };
 
@@ -138,7 +109,7 @@ const ObjectivesPage = () => {
                         objective={editingObjective}
                         onSubmit={handleFormSubmit}
                         onCancel={handleFormClose}
-                        domains={categories}
+                        domains={domains}
                     />
                 </div>
             )}

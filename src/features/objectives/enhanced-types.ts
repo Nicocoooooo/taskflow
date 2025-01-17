@@ -86,15 +86,20 @@ export interface CreateEnhancedObjectiveDto {
     title: string;
     description?: string;
     domain_id?: number;
+    category_id?: number; // Ajout du champ
     type: ObjectiveType;
     due_date?: string;
-    smart_specific: string;
-    smart_measurable: string;
-    smart_achievable: string;
-    smart_realistic: string;
-    target_value: number;
-    measurement_unit: string;
     priority: number;
+
+    // Les champs SMART sont maintenant optionnels
+    smart_specific?: string;
+    smart_measurable?: string;
+    smart_achievable?: string;
+    smart_realistic?: string;
+    target_value?: number;
+    measurement_unit?: string;
+
+    // Relations
     steps?: CreateObjectiveStepDto[];
     kpis?: Array<{
         name: string;
