@@ -23,3 +23,24 @@ export interface UpdateObjectiveStepDto {
     order_index?: number;
     is_completed?: boolean;
 }
+
+export interface UpdateObjectiveDto {
+    title?: string;
+    description?: string;
+    due_date?: string;
+    category_id?: number;
+    domain_id?: number;
+    type?: ObjectiveType;
+    status?: ObjectiveStatus;
+    progress?: number;
+    notes?: string;
+
+    // Champs SMART
+    smart_specific?: string;
+    smart_measurable?: string;
+    smart_achievable?: string;
+    smart_realistic?: string;
+    target_value?: number;
+    measurement_unit?: string;
+    priority?: number;
+}
