@@ -1,47 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
+import { Plus } from 'lucide-react';
 import HabitForm from '../../components/habits/HabitForm';
 import HabitCard from '../../components/habits/HabitCard';
-import { CreateHabitDto, Habit } from '../../features/habits/types';
+import { CreateHabitDto, Habit, HabitLog } from '../../features/habits/types';
 import { habitsApi } from '../../features/habits/api';
-import { Plus } from 'lucide-react';
 
 const HabitsPage: React.FC = () => {
+    // États
     const [showForm, setShowForm] = useState(false);
     const [habits, setHabits] = useState<Habit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [completedHabits, setCompletedHabits] = useState<Record<number, boolean>>({});
+    const [habitLogs, setHabitLogs] = useState<Record<number, HabitLog[]>>({});
 
-    // Charger les habitudes
+    // Charger les habitudes et leurs logs
     const fetchHabits = async () => {
         try {
             setIsLoading(true);
-            const data = await habitsApi.fetchHabits();
-            setHabits(data);
+            setError(null);
+
+            // Récupérer les habitudes
+            const habitsData = await habitsApi.fetchHabits();
+            setHabits(habitsData);
 
             // Vérifier les habitudes complétées aujourd'hui
             const completedStatus: Record<number, boolean> = {};
+            const logsData: Record<number, HabitLog[]> = {};
+
             await Promise.all(
-                data.map(async (habit) => {
+                habitsData.map(async (habit) => {
+                    // Vérifier si complétée aujourd'hui
                     completedStatus[habit.id] = await habitsApi.isHabitCompletedToday(habit.id);
+                    // Récupérer les logs
+                    logsData[habit.id] = await habitsApi.getHabitLogs(habit.id);
                 })
             );
+
             setCompletedHabits(completedStatus);
+            setHabitLogs(logsData);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+            console.error('Erreur lors du chargement des habitudes:', err);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Charger les données au montage
     useEffect(() => {
         fetchHabits();
     }, []);
 
+    // Créer une nouvelle habitude
     const handleCreateHabit = async (habitData: CreateHabitDto) => {
         try {
+            setError(null);
             await habitsApi.createHabit(habitData);
             setShowForm(false);
             fetchHabits(); // Recharger la liste
@@ -51,17 +67,32 @@ const HabitsPage: React.FC = () => {
         }
     };
 
+    // Marquer une habitude comme complétée
     const handleCompleteHabit = async (habitId: number) => {
         try {
+            setError(null);
             await habitsApi.completeHabit(habitId);
             setCompletedHabits(prev => ({
                 ...prev,
                 [habitId]: true
             }));
-            // Rafraîchir les données pour mettre à jour les streaks
+            // Rafraîchir les données pour mettre à jour les streaks et logs
             fetchHabits();
         } catch (error) {
             console.error('Erreur lors de la complétion de l\'habitude:', error);
+            setError('Erreur lors de la complétion de l\'habitude');
+        }
+    };
+
+    // Supprimer une habitude
+    const handleDeleteHabit = async (habitId: number) => {
+        try {
+            setError(null);
+            await habitsApi.deleteHabit(habitId);
+            fetchHabits(); // Recharger la liste
+        } catch (error) {
+            console.error('Erreur lors de la suppression de l\'habitude:', error);
+            setError('Erreur lors de la suppression de l\'habitude');
         }
     };
 
@@ -82,10 +113,12 @@ const HabitsPage: React.FC = () => {
             {/* Formulaire de création */}
             {showForm && (
                 <Card className="mb-8">
-                    <HabitForm
-                        onSubmit={handleCreateHabit}
-                        onCancel={() => setShowForm(false)}
-                    />
+                    <div className="p-6">
+                        <HabitForm
+                            onSubmit={handleCreateHabit}
+                            onCancel={() => setShowForm(false)}
+                        />
+                    </div>
                 </Card>
             )}
 
@@ -117,7 +150,9 @@ const HabitsPage: React.FC = () => {
                             key={habit.id}
                             habit={habit}
                             onComplete={handleCompleteHabit}
+                            onDelete={handleDeleteHabit}
                             isCompletedToday={completedHabits[habit.id] || false}
+                            habitLogs={habitLogs[habit.id] || []}
                         />
                     ))}
                 </div>
