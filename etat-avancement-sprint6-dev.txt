@@ -1,0 +1,160 @@
+# Documentation de Développement - TaskFlow Sprint 5
+
+## Résumé des Réalisations du Sprint 5
+- Refonte complète du système d'objectifs avec approche SMART
+- Migration des catégories vers les domaines de vie (life_domains)
+- Nettoyage et optimisation des types TypeScript
+- Correction des problèmes de déploiement Vercel
+- Amélioration de la gestion des erreurs et du feedback utilisateur
+
+## Système d'Objectifs Amélioré
+
+### Nouvelle Architecture
+- Refonte complète du système avec approche SMART (Spécifique, Mesurable, Atteignable, Réaliste, Temporel)
+- Intégration avec les domaines de vie (life_domains)
+- Support des objectifs mesurables avec valeurs cibles
+- Système d'étapes pour suivre la progression
+- Gestion unifiée des types avec enhanced-types.ts
+
+#### Formulaire d'Objectif Amélioré
+- Interface à onglets pour une meilleure organisation :
+  * Onglet "Informations de base" : détails généraux et domaine de vie
+  * Onglet "Méthode SMART" : définition structurée de l'objectif
+  * Onglet "Étapes" : décomposition des objectifs
+- Validation TypeScript stricte
+- Gestion des formulaires contrôlés avec retour visuel
+
+#### Système de Domaines de Vie
+- Migration de `categories` vers `life_domains`
+- Table dédiée pour les domaines de vie avec couleurs
+- API dédiée pour la gestion des domaines
+- Intégration visuelle avec code couleur dans l'interface
+
+#### Types et Interfaces
+- Nettoyage des types redondants
+- Interface `EnhancedObjective` comme type principal
+- Types stricts pour la création et mise à jour
+- Séparation claire entre les DTOs et les modèles
+
+### Base de Données
+- Structure optimisée de la table objectives :
+```sql
+create table public.objectives (
+    id serial not null,
+    title character varying(200) not null,
+    description text null,
+    due_date timestamp with time zone null,
+    category_id integer null,
+    type character varying(20) null,
+    status character varying(20) null default 'not_started'::character varying,
+    progress integer null default 0,
+    notes text null,
+    created_at timestamp with time zone not null default now(),
+    domain_id integer null,
+    parent_id integer null,
+    smart_specific text null,
+    smart_measurable text null,
+    smart_achievable text null,
+    smart_realistic text null,
+    target_value double precision null,
+    current_value double precision null,
+    measurement_unit character varying(50) null,
+    motivation_quote text null,
+    reminder_frequency character varying(50) null,
+    last_reminder_at timestamp with time zone null,
+    celebration_message text null,
+    priority integer null default 1,
+    completed_at timestamp with time zone null,
+    CONSTRAINT objectives_pkey PRIMARY KEY (id),
+    CONSTRAINT objectives_domain_id_fkey FOREIGN KEY (domain_id) REFERENCES life_domains(id)
+);
+```
+
+## Structure du Projet Mise à Jour
+
+```
+/src/
+├── components/
+│   ├── common/
+│   │   ├── Badge.tsx              # Badges pour les statuts et domaines
+│   │   ├── Button.tsx             # Composant bouton réutilisable
+│   │   ├── Card.tsx               # Conteneur principal
+│   │   ├── Input.tsx              # Champs de formulaire
+│   │   └── Modal.tsx              # Fenêtres modales
+│   │
+│   └── objectives/
+│       ├── EnhancedObjectiveForm.tsx   # Nouveau formulaire SMART
+│       ├── ObjectiveCard.tsx           # Affichage avec domaines
+│       └── ObjectiveProgress.tsx       # Barre de progression
+│
+├── features/
+│   ├── life-domains/                   # Nouvelle feature
+│   │   └── api.ts                      # API des domaines de vie
+│   │
+│   └── objectives/
+│       ├── api.ts                      # API mise à jour
+│       ├── enhanced-types.ts           # Nouveaux types unifiés
+│       └── types.ts                    # Types de base
+│
+└── pages/
+    └── objectives/
+        └── index.tsx                   # Page principale des objectifs
+```
+
+## Points Techniques Importants
+
+### Gestion des Types
+- Suppression de la duplication entre `types.ts` et `enhanced-types.ts`
+- Types principaux :
+  * `EnhancedObjective` : interface complète d'un objectif
+  * `CreateEnhancedObjectiveDto` : DTO pour la création
+  * `UpdateObjectiveDto` : DTO pour la mise à jour
+  * Types de base (ObjectiveType, ObjectiveStatus, etc.)
+
+### Déploiement Vercel
+- Résolution des problèmes de build :
+  * Suppression des types en doublon
+  * Correction des imports circulaires
+  * Mise à jour des dépendances TypeScript
+
+### API et Base de Données
+- Gestion unifiée des clés étrangères :
+  * Utilisation de `domain_id` pour la référence aux domaines de vie
+  * Conservation temporaire de `category_id` pour compatibilité
+- Optimisation des requêtes Supabase avec sélections ciblées
+
+## Problèmes Résolus
+1. Conflit de types entre les différentes interfaces d'objectifs
+2. Erreur de contrainte de clé étrangère avec life_domains
+3. Problèmes de build Vercel dûs aux types dupliqués
+4. Inconsistance dans la gestion des domaines/catégories
+
+## Prochaines Étapes (Sprint 6)
+
+### Priorités Immédiates
+1. Implémentation des KPIs
+   - Système de suivi des indicateurs
+   - Visualisation des progrès
+   - Calcul des tendances
+
+2. Visualisations
+   - Timeline des objectifs
+   - Vue d'ensemble par domaine
+   - Graphiques de progression
+
+3. Amélioration UX/UI
+   - Polish des animations
+   - Optimisation mobile
+   - Feedback utilisateur
+
+### Points d'Attention
+- Tests de performance avec beaucoup de données
+- Compatibilité mobile du formulaire à onglets
+- Gestion de la mémoire avec les grands projets
+- Documentation utilisateur à jour
+
+## Ressources et Documentation
+- Documentation Supabase : https://supabase.com/docs
+- Documentation React : https://react.dev
+- Issues GitHub pour le suivi des bugs
+- Wiki du projet pour la documentation technique
