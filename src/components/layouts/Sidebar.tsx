@@ -5,8 +5,7 @@ import {
     CheckSquare,
     Target,
     History,
-    BarChart2,
-    Calendar
+    BarChart2
 } from 'lucide-react';
 
 const navigation = [
@@ -40,11 +39,6 @@ const navigation = [
         name: 'Statistiques',
         path: '/stats',
         icon: BarChart2
-    },
-    {
-        name: 'Planning',
-        path: '/calendar',
-        icon: Calendar
     }
 ];
 
