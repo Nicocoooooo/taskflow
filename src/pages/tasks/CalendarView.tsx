@@ -107,7 +107,15 @@ const CalendarView: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-4 sm:px-6 lg:px-8">
+            {/* Instruction de défilement sur mobile */}
+            <div className="block sm:hidden mb-4 text-center">
+                <p className="text-sm text-gray-500">
+                    Faites défiler horizontalement pour voir toute la semaine
+                </p>
+            </div>
+
+            {/* En-tête */}
             <CalendarHeader
                 currentDate={currentDate}
                 onPreviousWeek={handlePreviousWeek}
@@ -115,14 +123,22 @@ const CalendarView: React.FC = () => {
                 onThisWeek={handleThisWeek}
             />
 
-            <CalendarGrid
-                currentDate={currentDate}
-                tasks={tasks}
-                onDateClick={handleDateClick}
-                onTaskClick={handleTaskClick}
-                onTaskDelete={handleDeleteClick}
-            />
+            {/* Grille du calendrier avec scrollbar sur mobile */}
+            <div className="relative">
+                <CalendarGrid
+                    currentDate={currentDate}
+                    tasks={tasks}
+                    onDateClick={handleDateClick}
+                    onTaskClick={handleTaskClick}
+                    onTaskDelete={handleDeleteClick}
+                />
 
+                {/* Indicateurs de défilement sur mobile */}
+                <div className="absolute inset-y-0 -left-4 w-4 bg-gradient-to-r from-white to-transparent sm:hidden" />
+                <div className="absolute inset-y-0 -right-4 w-4 bg-gradient-to-l from-white to-transparent sm:hidden" />
+            </div>
+
+            {/* Modal de création/édition */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => {
@@ -132,17 +148,20 @@ const CalendarView: React.FC = () => {
                 }}
                 title={isCreateMode ? "Nouvelle tâche" : "Modifier la tâche"}
             >
-                <TaskForm
-                    initialData={getInitialData()}
-                    onSubmit={handleSubmit}
-                    onCancel={() => {
-                        setIsModalOpen(false);
-                        setSelectedTask(null);
-                        setSelectedDate(null);
-                    }}
-                />
+                <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <TaskForm
+                        initialData={getInitialData()}
+                        onSubmit={handleSubmit}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setSelectedTask(null);
+                            setSelectedDate(null);
+                        }}
+                    />
+                </div>
             </Modal>
 
+            {/* Modal de confirmation de suppression */}
             <ConfirmModal
                 isOpen={!!taskToDelete}
                 onClose={() => setTaskToDelete(null)}
