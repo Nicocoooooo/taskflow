@@ -7,7 +7,8 @@ import {
     Target,
     Clock,
     AlertCircle,
-    BarChart2
+    BarChart2,
+    Trash2
 } from 'lucide-react';
 import { Card } from '../common/Card';
 import { ObjectiveStatus, ObjectiveType } from '../../features/objectives/types';
@@ -63,6 +64,7 @@ const getTypeIcon = (type: ObjectiveType) => {
 const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
     objective,
     onClick,
+    onDelete,
 }) => {
     const {
         title,
@@ -86,16 +88,30 @@ const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
     const completedSteps = steps.filter(step => step.is_completed).length;
     const totalSteps = steps.length;
 
-    // Calcul du pourcentage de progression de la valeur cible
     const targetProgress = target_value && target_value > 0
         ? Math.round(((current_value || 0) / target_value) * 100)
         : 0;
 
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete?.();
+    };
+
     return (
         <Card
-            className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
+            className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group relative"
             onClick={onClick}
         >
+            {/* Bouton de suppression */}
+            {onDelete && (
+                <button
+                    onClick={handleDelete}
+                    className="absolute right-3 top-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 transition-all text-red-500 z-10"
+                >
+                    <Trash2 className="h-5 w-5" />
+                </button>
+            )}
+
             <div className="flex flex-col gap-4">
                 {/* En-tête avec badges */}
                 <div className="flex items-center justify-between">
