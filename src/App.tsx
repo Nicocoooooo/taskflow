@@ -7,6 +7,8 @@ import CalendarView from './pages/tasks/CalendarView';
 import EisenhowerView from './pages/tasks/EisenhowerView';
 import ObjectivesPage from './pages/objectives/index';
 import HabitsPage from './pages/habits/index';
+import StatsOverview from './pages/stats/index';
+
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
           <Route path="/tasks/matrix" element={<EisenhowerView />} />
           <Route path="/objectives" element={<ObjectivesPage />} />
           <Route path="/habits" element={<HabitsPage />} />
+          <Route path="/stats" element={<StatsOverview />} />
         </Routes>
       </MainLayout>
     </Router>
