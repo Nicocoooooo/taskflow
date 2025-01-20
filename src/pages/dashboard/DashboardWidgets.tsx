@@ -7,6 +7,7 @@ import TaskCard from '../../components/tasks/TaskCard';
 import Modal from '../../components/common/Modal';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
+import { Button } from '../../components/common/Button';
 
 const DashboardWidgets = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -102,23 +103,23 @@ const DashboardWidgets = () => {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord</h1>
-                    <button
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Tableau de bord</h1>
+                    <Button
                         onClick={() => setShowQuickAdd(!showQuickAdd)}
-                        className="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl hover:bg-violet-700 transition-colors"
+                        className="w-full sm:w-auto"
                     >
-                        <Plus className="h-5 w-5" />
-                        Ajouter une tâche
-                    </button>
+                        <Plus className="h-5 w-5 mr-2" />
+                        <span className="whitespace-nowrap">Ajouter une tâche</span>
+                    </Button>
                 </div>
 
                 {/* Quick Add Form */}
                 {showQuickAdd && (
-                    <form onSubmit={handleQuickAdd} className="bg-white p-4 rounded-xl shadow-sm">
-                        <div className="flex gap-2">
+                    <form onSubmit={handleQuickAdd} className="bg-white p-3 md:p-4 rounded-xl shadow-sm">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <input
                                 type="text"
                                 name="name"
@@ -127,29 +128,29 @@ const DashboardWidgets = () => {
                                 required
                                 autoFocus
                             />
-                            <button
+                            <Button
                                 type="submit"
-                                className="bg-violet-600 text-white px-4 py-2 rounded-xl hover:bg-violet-700 transition-colors"
+                                className="w-full sm:w-auto"
                             >
                                 Ajouter
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 )}
 
                 {/* Tâches en retard */}
                 {overdueTasks.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                         <div className="flex items-center gap-2 text-red-600">
-                            <AlertCircle className="h-5 w-5" />
+                            <AlertCircle className="h-5 w-5 flex-shrink-0" />
                             <h2 className="text-lg font-semibold">Tâches en retard</h2>
                         </div>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                             {overdueTasks.map(task => (
                                 <div
                                     key={task.id}
                                     onClick={() => handleTaskClick(task)}
-                                    className="cursor-pointer transition-transform hover:scale-102"
+                                    className="cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <div className="bg-red-50 rounded-xl p-1">
                                         <TaskCard
@@ -164,22 +165,24 @@ const DashboardWidgets = () => {
                 )}
 
                 {/* Tâches du jour */}
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                     <div className="flex items-center gap-2 text-gray-900">
-                        <Clock className="h-5 w-5" />
+                        <Clock className="h-5 w-5 flex-shrink-0" />
                         <h2 className="text-lg font-semibold">Tâches du jour</h2>
                     </div>
                     {todayTasks.length === 0 ? (
-                        <p className="text-gray-500 text-center py-8">
-                            Aucune tâche prévue pour aujourd'hui
-                        </p>
+                        <div className="bg-white rounded-xl p-8 text-center">
+                            <p className="text-gray-500">
+                                Aucune tâche prévue pour aujourd'hui
+                            </p>
+                        </div>
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                             {todayTasks.map(task => (
                                 <div
                                     key={task.id}
                                     onClick={() => handleTaskClick(task)}
-                                    className="cursor-pointer transition-transform hover:scale-102"
+                                    className="cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <TaskCard
                                         task={task}
@@ -192,7 +195,7 @@ const DashboardWidgets = () => {
                 </div>
             </div>
 
-            {/* Modal d'édition */}
+            {/* Modals */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => {
@@ -201,19 +204,20 @@ const DashboardWidgets = () => {
                 }}
                 title="Modifier la tâche"
             >
-                {selectedTask && (
-                    <TaskForm
-                        initialData={selectedTask}
-                        onSubmit={handleTaskUpdate}
-                        onCancel={() => {
-                            setIsEditModalOpen(false);
-                            setSelectedTask(null);
-                        }}
-                    />
-                )}
+                <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    {selectedTask && (
+                        <TaskForm
+                            initialData={selectedTask}
+                            onSubmit={handleTaskUpdate}
+                            onCancel={() => {
+                                setIsEditModalOpen(false);
+                                setSelectedTask(null);
+                            }}
+                        />
+                    )}
+                </div>
             </Modal>
 
-            {/* Modal de confirmation de suppression */}
             <ConfirmModal
                 isOpen={!!taskToDelete}
                 onClose={() => setTaskToDelete(null)}
