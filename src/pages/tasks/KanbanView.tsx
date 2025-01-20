@@ -6,8 +6,9 @@ import Modal from '../../components/common/Modal';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 import KanbanFilters from '../../components/tasks/KanbanFilters';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Button } from '../../components/common/Button';
 
 const COLUMNS: { id: TaskStatus; title: string }[] = [
     { id: 'todo', title: 'À faire' },
@@ -24,6 +25,7 @@ const KanbanView = () => {
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateMode, setIsCreateMode] = useState(false);
+    const [activeColumn, setActiveColumn] = useState<TaskStatus>('todo');
 
     useEffect(() => {
         const loadData = async () => {
@@ -102,6 +104,21 @@ const KanbanView = () => {
         }
     };
 
+    // Navigation mobile entre les colonnes
+    const handlePreviousColumn = () => {
+        const currentIndex = COLUMNS.findIndex(col => col.id === activeColumn);
+        if (currentIndex > 0) {
+            setActiveColumn(COLUMNS[currentIndex - 1].id);
+        }
+    };
+
+    const handleNextColumn = () => {
+        const currentIndex = COLUMNS.findIndex(col => col.id === activeColumn);
+        if (currentIndex < COLUMNS.length - 1) {
+            setActiveColumn(COLUMNS[currentIndex + 1].id);
+        }
+    };
+
     // Filtrage des tâches par catégorie
     const filteredTasks = tasks.filter(task =>
         !selectedCategory || task.category_id && task.category_id.toString() === selectedCategory.toString()
@@ -112,14 +129,18 @@ const KanbanView = () => {
         filteredTasks.filter(task => task.status === status);
 
     if (isLoading) {
-        return <div className="flex justify-center items-center h-48">Chargement...</div>;
+        return (
+            <div className="flex justify-center items-center h-48">
+                <div className="text-gray-500">Chargement...</div>
+            </div>
+        );
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-4 sm:px-6 lg:px-8">
             {/* Header avec titre et filtre */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900 mb-4">Tableau Kanban</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Tableau Kanban</h1>
                 <KanbanFilters
                     selectedCategory={selectedCategory}
                     onCategoryChange={setSelectedCategory}
@@ -127,21 +148,52 @@ const KanbanView = () => {
                 />
             </div>
 
+            {/* Navigation mobile entre colonnes */}
+            <div className="flex items-center justify-between mb-4 md:hidden">
+                <Button
+                    variant="ghost"
+                    onClick={handlePreviousColumn}
+                    disabled={activeColumn === 'todo'}
+                    className="p-2"
+                >
+                    <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <span className="font-medium">
+                    {COLUMNS.find(col => col.id === activeColumn)?.title}
+                </span>
+                <Button
+                    variant="ghost"
+                    onClick={handleNextColumn}
+                    disabled={activeColumn === 'done'}
+                    className="p-2"
+                >
+                    <ChevronRight className="h-5 w-5" />
+                </Button>
+            </div>
+
             {/* Colonnes Kanban */}
             <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-3 gap-4 md:gap-6">
                     {COLUMNS.map(column => {
                         const columnTasks = getTasksByStatus(column.id);
+                        const isVisible = column.id === activeColumn;
+
                         return (
-                            <div key={column.id} className="bg-gray-50 rounded-xl p-4">
+                            <div
+                                key={column.id}
+                                className={`bg-gray-50 rounded-xl p-4 ${!isVisible ? 'hidden md:block' : ''}`}
+                            >
                                 {/* En-tête de colonne */}
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-lg font-medium text-gray-900">
-                                        {column.title} ({columnTasks.length})
+                                        {column.title}
+                                        <span className="ml-2 text-sm text-gray-500">
+                                            ({columnTasks.length})
+                                        </span>
                                     </h2>
                                     <button
                                         onClick={() => handleCreateClick(column.id)}
-                                        className="p-1 hover:bg-gray-200 rounded-full"
+                                        className="p-2 hover:bg-gray-200 rounded-xl transition-colors"
                                         title={`Ajouter une tâche dans ${column.title}`}
                                     >
                                         <Plus className="h-5 w-5 text-gray-600" />
@@ -154,7 +206,9 @@ const KanbanView = () => {
                                         <div
                                             ref={provided.innerRef}
                                             {...provided.droppableProps}
-                                            className={`space-y-3 min-h-[200px] p-2 rounded-lg ${snapshot.isDraggingOver ? 'bg-violet-50 border-2 border-dashed border-violet-200' : ''
+                                            className={`space-y-3 min-h-[50vh] md:min-h-[70vh] p-2 rounded-lg transition-colors ${snapshot.isDraggingOver
+                                                    ? 'bg-violet-50 border-2 border-dashed border-violet-200'
+                                                    : ''
                                                 }`}
                                         >
                                             {columnTasks.map((task, index) => (
@@ -174,9 +228,14 @@ const KanbanView = () => {
                                                                     ? provided.draggableProps.style?.transform
                                                                     : 'none',
                                                             }}
-                                                            className={`${snapshot.isDragging ? 'rotate-2 scale-105' : ''
-                                                                } cursor-grab active:cursor-grabbing`}
-                                                            onClick={() => handleTaskClick(task)}
+                                                            className={`${snapshot.isDragging
+                                                                    ? 'rotate-2 scale-105'
+                                                                    : ''
+                                                                } cursor-grab active:cursor-grabbing touch-manipulation`}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleTaskClick(task);
+                                                            }}
                                                         >
                                                             <TaskCard
                                                                 task={task}
@@ -196,7 +255,7 @@ const KanbanView = () => {
                 </div>
             </DragDropContext>
 
-            {/* Modal de création/édition */}
+            {/* Modals */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => {
@@ -205,17 +264,18 @@ const KanbanView = () => {
                 }}
                 title={isCreateMode ? "Nouvelle tâche" : "Modifier la tâche"}
             >
-                <TaskForm
-                    initialData={selectedTask || undefined}
-                    onSubmit={handleSubmit}
-                    onCancel={() => {
-                        setIsModalOpen(false);
-                        setSelectedTask(null);
-                    }}
-                />
+                <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <TaskForm
+                        initialData={selectedTask || undefined}
+                        onSubmit={handleSubmit}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setSelectedTask(null);
+                        }}
+                    />
+                </div>
             </Modal>
 
-            {/* Modal de confirmation de suppression */}
             <ConfirmModal
                 isOpen={!!taskToDelete}
                 onClose={() => setTaskToDelete(null)}

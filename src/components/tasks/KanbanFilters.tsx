@@ -9,11 +9,11 @@ interface KanbanFiltersProps {
 
 const KanbanFilters = ({ selectedCategory, onCategoryChange, categories }: KanbanFiltersProps) => {
     return (
-        <div className="relative inline-block">
+        <div className="relative w-full sm:w-auto">
             <select
                 value={selectedCategory || ''}
                 onChange={(e) => onCategoryChange(e.target.value || null)}
-                className="appearance-none w-64 px-4 py-2 pr-10 bg-white border border-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent hover:border-gray-300 transition-colors"
+                className="appearance-none w-full sm:w-64 px-4 py-2 pr-10 bg-white border border-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent hover:border-gray-300 transition-colors"
             >
                 <option value="">Toutes les catégories</option>
                 {categories.map((category) => (
