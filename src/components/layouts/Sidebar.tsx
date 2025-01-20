@@ -5,8 +5,10 @@ import {
     CheckSquare,
     Target,
     History,
-    BarChart2
+    BarChart2,
+    X
 } from 'lucide-react';
+import { useMobileMenu } from './MobileMenuContext';
 
 const navigation = [
     {
@@ -44,6 +46,7 @@ const navigation = [
 
 const Sidebar = () => {
     const location = useLocation();
+    const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
     const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 
     const isCurrentPath = (path: string) => {
@@ -58,8 +61,23 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="w-64 bg-white border-r border-gray-200 fixed h-[calc(100vh-4rem)] top-16">
-            <nav className="h-full py-4">
+        <aside
+            className={`
+                fixed top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 
+                transform transition-transform duration-300 ease-in-out z-50
+                w-72 lg:w-64
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}
+        >
+            {/* Bouton fermer pour mobile */}
+            <button
+                onClick={closeMobileMenu}
+                className="lg:hidden absolute right-4 top-4 p-2 hover:bg-gray-100 rounded-xl"
+            >
+                <X className="h-5 w-5 text-gray-600" />
+            </button>
+
+            <nav className="h-full py-4 overflow-y-auto">
                 <div className="px-4 space-y-1">
                     {navigation.map((item) => {
                         const IconComponent = item.icon;
@@ -83,6 +101,7 @@ const Sidebar = () => {
                                 ) : (
                                     <Link
                                         to={item.path}
+                                        onClick={closeMobileMenu}
                                         className={`
                                             w-full flex items-center px-3 py-2 text-sm rounded-xl
                                             ${isActive ? 'bg-violet-50 text-violet-600' : 'text-gray-700 hover:bg-gray-50'}
@@ -100,6 +119,7 @@ const Sidebar = () => {
                                             <Link
                                                 key={child.path}
                                                 to={child.path}
+                                                onClick={closeMobileMenu}
                                                 className={`
                                                     block px-3 py-2 text-sm rounded-xl
                                                     ${isCurrentPath(child.path) ? 'text-violet-600' : 'text-gray-600 hover:text-gray-900'}
