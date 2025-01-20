@@ -77,9 +77,9 @@ const EisenhowerView: React.FC = () => {
     };
 
     const QuadrantHeader = ({ title, subtitle, color }: { title: string; subtitle: string; color: string }) => (
-        <div className={`p-4 border-b ${color}`}>
-            <div className="font-medium text-sm text-gray-600 mb-1">{title}</div>
-            <h3 className="font-semibold text-xl text-gray-900">{subtitle}</h3>
+        <div className={`p-3 sm:p-4 border-b ${color}`}>
+            <div className="font-medium text-xs sm:text-sm text-gray-600 mb-1">{title}</div>
+            <h3 className="font-semibold text-lg sm:text-xl text-gray-900">{subtitle}</h3>
         </div>
     );
 
@@ -96,8 +96,8 @@ const EisenhowerView: React.FC = () => {
         onDelete: (task: Task) => void;
         bgColor: string;
     }) => (
-        <div className={`p-4 h-full ${bgColor}`}>
-            <div className="space-y-2">
+        <div className={`p-3 sm:p-4 h-full ${bgColor}`}>
+            <div className="space-y-2 max-h-[250px] sm:max-h-none overflow-y-auto">
                 {tasks.map(task => (
                     <MiniTaskCard
                         key={task.id}
@@ -109,10 +109,10 @@ const EisenhowerView: React.FC = () => {
             </div>
             <button
                 onClick={onAddClick}
-                className="mt-4 w-full flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-violet-300 hover:text-violet-500 transition-colors"
+                className="mt-3 sm:mt-4 w-full flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-violet-300 hover:text-violet-500 transition-colors"
             >
                 <Plus className="h-4 w-4" />
-                Ajouter une tâche
+                <span className="text-sm">Ajouter une tâche</span>
             </button>
         </div>
     );
@@ -122,12 +122,24 @@ const EisenhowerView: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-6">Matrice d'Eisenhower</h1>
+        <div className="container mx-auto p-4 sm:px-6 lg:px-8">
+            {/* En-tête adaptative */}
+            <div className="mb-4 sm:mb-6">
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Matrice d'Eisenhower</h1>
+                <p className="mt-1 text-sm text-gray-500 hidden sm:block">
+                    Organisez vos tâches selon leur urgence et leur importance
+                </p>
+            </div>
 
-            <div className="grid grid-cols-2 gap-4 h-[calc(100vh-200px)]">
+            {/* Instructions mobile */}
+            <div className="sm:hidden mb-4 text-sm text-gray-500">
+                Faites défiler chaque quadrant verticalement pour voir toutes les tâches
+            </div>
+
+            {/* Grille responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 h-[calc(100vh-11rem)] sm:h-[calc(100vh-12rem)]">
                 {/* Important & Non Urgent (2) - PLANIFIER */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
                         title="Important mais pas urgent (2)"
                         subtitle="PLANIFIER"
@@ -143,7 +155,7 @@ const EisenhowerView: React.FC = () => {
                 </div>
 
                 {/* Urgent & Important (1) - FAIRE */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
                         title="Urgent et important (1)"
                         subtitle="FAIRE"
@@ -159,7 +171,7 @@ const EisenhowerView: React.FC = () => {
                 </div>
 
                 {/* Non Urgent & Non Important (4) - ÉLIMINER */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
                         title="Ni urgent ni important (4)"
                         subtitle="ÉLIMINER"
@@ -175,7 +187,7 @@ const EisenhowerView: React.FC = () => {
                 </div>
 
                 {/* Urgent & Non Important (3) - DÉLÉGUER */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden flex flex-col">
                     <QuadrantHeader
                         title="Urgent mais pas important (3)"
                         subtitle="DÉLÉGUER"
@@ -191,6 +203,7 @@ const EisenhowerView: React.FC = () => {
                 </div>
             </div>
 
+            {/* Modals */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => {
@@ -200,22 +213,24 @@ const EisenhowerView: React.FC = () => {
                 }}
                 title={selectedTask ? "Modifier la tâche" : "Nouvelle tâche"}
             >
-                <TaskForm
-                    initialData={selectedTask || {
-                        name: '',
-                        description: '',
-                        priority: 'medium',
-                        status: 'todo',
-                        is_urgent: selectedQuadrant?.urgent || false,
-                        is_important: selectedQuadrant?.important || false,
-                    } as TaskFormData}
-                    onSubmit={handleSubmit}
-                    onCancel={() => {
-                        setIsModalOpen(false);
-                        setSelectedTask(null);
-                        setSelectedQuadrant(null);
-                    }}
-                />
+                <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <TaskForm
+                        initialData={selectedTask || {
+                            name: '',
+                            description: '',
+                            priority: 'medium',
+                            status: 'todo',
+                            is_urgent: selectedQuadrant?.urgent || false,
+                            is_important: selectedQuadrant?.important || false,
+                        } as TaskFormData}
+                        onSubmit={handleSubmit}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setSelectedTask(null);
+                            setSelectedQuadrant(null);
+                        }}
+                    />
+                </div>
             </Modal>
 
             <ConfirmModal
