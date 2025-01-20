@@ -1,6 +1,7 @@
 import { Category, TaskPriority, TaskStatus } from '../../features/tasks/types';
-import { ChevronDown } from 'lucide-react';
-import { SelectHTMLAttributes, ReactNode } from 'react';
+import { ChevronDown, Filter } from 'lucide-react';
+import { SelectHTMLAttributes, ReactNode, useState } from 'react';
+import { Button } from '../common/Button';
 
 interface TaskFilters {
     categories: string[];
@@ -33,107 +34,124 @@ const Select = ({ children, ...props }: SelectProps) => (
 );
 
 const TaskFilters = ({ filters, onFiltersChange, categories }: TaskFiltersProps) => {
+    const [isVisible, setIsVisible] = useState(false);
+
     return (
-        <div className="p-6 mb-6 space-y-4 rounded-xl bg-gray-50 border border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                {/* Filtre par catégorie */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Catégories
-                    </label>
-                    <Select
-                        value={filters.categories[0] || ''}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            onFiltersChange({ ...filters, categories: value ? [value] : [] });
-                        }}
-                    >
-                        <option value="">Toutes les catégories</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </Select>
-                </div>
+        <div>
+            {/* Bouton mobile pour afficher/masquer les filtres */}
+            <div className="md:hidden mb-4">
+                <Button
+                    variant="secondary"
+                    onClick={() => setIsVisible(!isVisible)}
+                    className="w-full"
+                >
+                    <Filter className="h-4 w-4 mr-2" />
+                    {isVisible ? 'Masquer les filtres' : 'Afficher les filtres'}
+                </Button>
+            </div>
 
-                {/* Filtre par statut */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Statut
-                    </label>
-                    <Select
-                        value={filters.status[0] || ''}
-                        onChange={(e) => {
-                            const value = e.target.value as TaskStatus;
-                            onFiltersChange({ ...filters, status: value ? [value] : [] });
-                        }}
-                    >
-                        <option value="">Tous les statuts</option>
-                        <option value="todo">À faire</option>
-                        <option value="in_progress">En cours</option>
-                        <option value="done">Terminé</option>
-                    </Select>
-                </div>
+            <div className={`${!isVisible ? 'hidden md:block' : ''} p-4 md:p-6 mb-6 space-y-4 rounded-xl bg-gray-50 border border-gray-100`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+                    {/* Filtre par catégorie */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Catégories
+                        </label>
+                        <Select
+                            value={filters.categories[0] || ''}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                onFiltersChange({ ...filters, categories: value ? [value] : [] });
+                            }}
+                        >
+                            <option value="">Toutes les catégories</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </div>
 
-                {/* Filtre par priorité */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Priorité
-                    </label>
-                    <Select
-                        value={filters.priority[0] || ''}
-                        onChange={(e) => {
-                            const value = e.target.value as TaskPriority;
-                            onFiltersChange({ ...filters, priority: value ? [value] : [] });
-                        }}
-                    >
-                        <option value="">Toutes les priorités</option>
-                        <option value="low">Basse</option>
-                        <option value="medium">Moyenne</option>
-                        <option value="high">Haute</option>
-                        <option value="urgent">Urgente</option>
-                    </Select>
-                </div>
+                    {/* Filtre par statut */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Statut
+                        </label>
+                        <Select
+                            value={filters.status[0] || ''}
+                            onChange={(e) => {
+                                const value = e.target.value as TaskStatus;
+                                onFiltersChange({ ...filters, status: value ? [value] : [] });
+                            }}
+                        >
+                            <option value="">Tous les statuts</option>
+                            <option value="todo">À faire</option>
+                            <option value="in_progress">En cours</option>
+                            <option value="done">Terminé</option>
+                        </Select>
+                    </div>
 
-                {/* Tri par */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Trier par
-                    </label>
-                    <Select
-                        value={filters.sortBy}
-                        onChange={(e) => {
-                            onFiltersChange({
-                                ...filters,
-                                sortBy: e.target.value as 'date' | 'priority' | 'status' | 'name'
-                            });
-                        }}
-                    >
-                        <option value="date">Date</option>
-                        <option value="priority">Priorité</option>
-                        <option value="status">Statut</option>
-                        <option value="name">Nom</option>
-                    </Select>
-                </div>
+                    {/* Filtre par priorité */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Priorité
+                        </label>
+                        <Select
+                            value={filters.priority[0] || ''}
+                            onChange={(e) => {
+                                const value = e.target.value as TaskPriority;
+                                onFiltersChange({ ...filters, priority: value ? [value] : [] });
+                            }}
+                        >
+                            <option value="">Toutes les priorités</option>
+                            <option value="low">Basse</option>
+                            <option value="medium">Moyenne</option>
+                            <option value="high">Haute</option>
+                            <option value="urgent">Urgente</option>
+                        </Select>
+                    </div>
 
-                {/* Ordre de tri */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ordre
-                    </label>
-                    <Select
-                        value={filters.sortOrder}
-                        onChange={(e) => {
-                            onFiltersChange({
-                                ...filters,
-                                sortOrder: e.target.value as 'asc' | 'desc'
-                            });
-                        }}
-                    >
-                        <option value="asc">Croissant</option>
-                        <option value="desc">Décroissant</option>
-                    </Select>
+                    {/* Tri par & Ordre de tri sur la même ligne en mobile */}
+                    <div className="space-y-4 lg:space-y-0 col-span-1 md:col-span-2 lg:col-span-1">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Trier par
+                            </label>
+                            <Select
+                                value={filters.sortBy}
+                                onChange={(e) => {
+                                    onFiltersChange({
+                                        ...filters,
+                                        sortBy: e.target.value as 'date' | 'priority' | 'status' | 'name'
+                                    });
+                                }}
+                            >
+                                <option value="date">Date</option>
+                                <option value="priority">Priorité</option>
+                                <option value="status">Statut</option>
+                                <option value="name">Nom</option>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Ordre
+                        </label>
+                        <Select
+                            value={filters.sortOrder}
+                            onChange={(e) => {
+                                onFiltersChange({
+                                    ...filters,
+                                    sortOrder: e.target.value as 'asc' | 'desc'
+                                });
+                            }}
+                        >
+                            <option value="asc">Croissant</option>
+                            <option value="desc">Décroissant</option>
+                        </Select>
+                    </div>
                 </div>
             </div>
         </div>

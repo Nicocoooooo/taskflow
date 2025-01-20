@@ -7,6 +7,7 @@ import ConfirmModal from '../../components/common/ConfirmModal';
 import TaskForm from '../../components/tasks/TaskForm';
 import TaskFilters from '../../components/tasks/TaskFilters';
 import { Plus, Search } from 'lucide-react';
+import { Button } from '../../components/common/Button';
 
 const ListView = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -133,17 +134,17 @@ const ListView = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">Toutes les tâches</h1>
-                <button
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Toutes les tâches</h1>
+                <Button
                     onClick={handleCreateClick}
-                    className="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl hover:bg-violet-700 transition-colors"
+                    className="w-full sm:w-auto"
                 >
-                    <Plus className="h-5 w-5" />
-                    Nouvelle tâche
-                </button>
+                    <Plus className="h-5 w-5 mr-2" />
+                    <span className="whitespace-nowrap">Nouvelle tâche</span>
+                </Button>
             </div>
 
             {/* Filtres */}
@@ -161,21 +162,28 @@ const ListView = () => {
                     placeholder="Rechercher une tâche..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 />
             </div>
 
             {/* Liste des tâches */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredAndSortedTasks.map(task => (
-                    <TaskCard
-                        key={task.id}
-                        task={task}
-                        onClick={() => handleTaskClick(task)}
-                        onDelete={handleDeleteClick}
-                    />
-                ))}
-            </div>
+            {filteredAndSortedTasks.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                    <p className="text-gray-500 mb-2">Aucune tâche trouvée</p>
+                    <p className="text-sm text-gray-400">Modifiez vos filtres ou créez une nouvelle tâche</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                    {filteredAndSortedTasks.map(task => (
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            onClick={() => handleTaskClick(task)}
+                            onDelete={handleDeleteClick}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Modal de création/édition */}
             <Modal
@@ -186,14 +194,16 @@ const ListView = () => {
                 }}
                 title={isCreateMode ? "Nouvelle tâche" : "Modifier la tâche"}
             >
-                <TaskForm
-                    initialData={selectedTask || undefined}
-                    onSubmit={handleSubmit}
-                    onCancel={() => {
-                        setIsModalOpen(false);
-                        setSelectedTask(null);
-                    }}
-                />
+                <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                    <TaskForm
+                        initialData={selectedTask || undefined}
+                        onSubmit={handleSubmit}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setSelectedTask(null);
+                        }}
+                    />
+                </div>
             </Modal>
 
             {/* Modal de confirmation de suppression */}
