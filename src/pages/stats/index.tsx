@@ -7,18 +7,32 @@ const StatsOverview: React.FC = () => {
     const { data, isLoading, error } = useStats();
 
     if (isLoading) {
-        return <div>Chargement des statistiques...</div>;
+        return (
+            <div className="flex items-center justify-center h-[calc(100vh-4rem)] p-4">
+                <div className="text-gray-500">Chargement des statistiques...</div>
+            </div>
+        );
     }
 
     if (error) {
-        return <div>Erreur lors du chargement des statistiques : {error.message}</div>;
+        return (
+            <div className="p-4 sm:p-6 flex items-center justify-center">
+                <div className="text-red-600 text-center">
+                    <p className="font-medium mb-2">Une erreur est survenue</p>
+                    <p className="text-sm">{error.message}</p>
+                </div>
+            </div>
+        );
     }
 
     if (!data) {
-        return <div>Aucune donnée disponible</div>;
+        return (
+            <div className="p-4 sm:p-6 flex items-center justify-center">
+                <div className="text-gray-500 text-center">Aucune donnée disponible</div>
+            </div>
+        );
     }
 
-    // Formatage des données pour les graphiques
     const timelineData = data.timeline.monthlyOverview.map(item => ({
         date: item.month,
         value: item.tasksCompleted
@@ -35,9 +49,9 @@ const StatsOverview: React.FC = () => {
     }));
 
     return (
-        <div className="p-6 space-y-6">
-            {/* En-tête avec les KPIs principaux */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            {/* KPIs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 <StatCard
                     title="Tâches Complétées"
                     value={data.general.tasksCompleted}
@@ -69,35 +83,40 @@ const StatsOverview: React.FC = () => {
                 />
             </div>
 
-            {/* Graphiques */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Graphiques principaux */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                 <StatChart
                     type="line"
                     data={timelineData}
-                    title="Évolution des Tâches Complétées"
+                    title="Évolution des Tâches"
                     description="Progression sur la période"
                     variant="primary"
+                    height={250}
+                    className="overflow-hidden"
                 />
 
                 <StatChart
                     type="bar"
                     data={productivityByDay}
                     title="Productivité par Jour"
-                    description="Nombre de tâches complétées par jour"
+                    description="Tâches complétées par jour"
                     variant="success"
+                    height={250}
+                    className="overflow-hidden"
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                 <StatChart
                     type="pie"
                     data={categoryDistribution}
                     title="Distribution par Catégorie"
-                    description="Répartition des tâches par catégorie"
+                    description="Répartition des tâches"
                     variant="warning"
+                    height={300}
                 />
 
-                <div className="space-y-6">
+                <div className="space-y-3 sm:space-y-4">
                     {data.general.timePerCategory.map((category, index) => (
                         <StatCard
                             key={category.categoryId}
@@ -105,6 +124,7 @@ const StatsOverview: React.FC = () => {
                             value={`${category.taskCount} tâches`}
                             description={`${Math.round(category.timeSpent / 60)}h de temps total`}
                             variant={index % 2 === 0 ? 'default' : 'primary'}
+                            className="h-auto"
                         />
                     ))}
                 </div>

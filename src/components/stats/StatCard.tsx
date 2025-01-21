@@ -53,25 +53,31 @@ const StatCard: React.FC<StatCardProps> = ({
 
     return (
         <div className={cn(
-            'rounded-3xl p-6 border shadow-sm',
+            'rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm',
             variantStyles[variant],
             className
         )}>
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start gap-3">
                 <div>
-                    <h3 className="text-gray-600 text-sm font-medium mb-1">
+                    <h3 className="text-gray-600 text-xs sm:text-sm font-medium mb-1">
                         {title}
                     </h3>
-                    <div className="flex items-baseline gap-2">
-                        <p className={cn("text-2xl font-bold", valueStyles[variant])}>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                        <p className={cn(
+                            "text-xl sm:text-2xl font-bold leading-none",
+                            valueStyles[variant]
+                        )}>
                             {value}
                         </p>
                         {trend !== undefined && (
                             <div className={cn(
-                                "px-2 py-1 rounded-full text-sm font-medium flex items-center gap-1",
+                                "px-2 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1",
                                 getTrendStyle(trend)
                             )}>
-                                {trend > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                                {trend > 0 ?
+                                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" /> :
+                                    <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                                }
                                 {Math.abs(trend)}%
                             </div>
                         )}
@@ -79,16 +85,16 @@ const StatCard: React.FC<StatCardProps> = ({
                 </div>
                 {Icon && (
                     <div className={cn(
-                        "p-3 rounded-2xl",
+                        "p-2 sm:p-3 rounded-xl sm:rounded-2xl",
                         variantStyles[variant]
                     )}>
-                        <Icon className={valueStyles[variant]} size={24} />
+                        <Icon className={cn(valueStyles[variant], "w-5 h-5 sm:w-6 sm:h-6")} />
                     </div>
                 )}
             </div>
 
             {sparklineData && (
-                <div className="h-12 mt-4">
+                <div className="h-10 sm:h-12 mt-3 sm:mt-4">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={sparklineData}>
                             <Line
@@ -104,7 +110,7 @@ const StatCard: React.FC<StatCardProps> = ({
             )}
 
             {description && (
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-500 text-xs sm:text-sm mt-2">
                     {description}
                 </p>
             )}
