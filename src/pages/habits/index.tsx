@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Plus } from 'lucide-react';
 import HabitForm from '../../components/habits/HabitForm';
@@ -97,13 +96,13 @@ const HabitsPage: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="p-4 sm:px-6 lg:px-8 pt-20">
             {/* En-tête */}
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Mes Habitudes</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Mes Habitudes</h1>
                 <Button
                     onClick={() => setShowForm(true)}
-                    className="flex items-center gap-2"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
                     Nouvelle habitude
@@ -112,19 +111,17 @@ const HabitsPage: React.FC = () => {
 
             {/* Formulaire de création */}
             {showForm && (
-                <Card className="mb-8">
-                    <div className="p-6">
-                        <HabitForm
-                            onSubmit={handleCreateHabit}
-                            onCancel={() => setShowForm(false)}
-                        />
-                    </div>
-                </Card>
+                <div className="mb-6 sm:mb-8">
+                    <HabitForm
+                        onSubmit={handleCreateHabit}
+                        onCancel={() => setShowForm(false)}
+                    />
+                </div>
             )}
 
             {/* Message d'erreur */}
             {error && (
-                <div className="mb-8 p-4 bg-red-50 text-red-600 rounded-lg">
+                <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm sm:text-base">
                     {error}
                 </div>
             )}
@@ -135,16 +132,19 @@ const HabitsPage: React.FC = () => {
                     <p className="text-gray-600">Chargement des habitudes...</p>
                 </div>
             ) : habits.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-gray-600 text-lg mb-4">
+                <div className="text-center py-8 sm:py-12">
+                    <p className="text-gray-600 text-base sm:text-lg mb-4">
                         Aucune habitude pour le moment.
                     </p>
-                    <Button onClick={() => setShowForm(true)}>
+                    <Button
+                        onClick={() => setShowForm(true)}
+                        className="w-full sm:w-auto"
+                    >
                         Commencer par en créer une !
                     </Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {habits.map((habit) => (
                         <HabitCard
                             key={habit.id}

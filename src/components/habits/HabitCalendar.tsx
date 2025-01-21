@@ -25,27 +25,27 @@ const HabitCalendar: React.FC<HabitCalendarProps> = ({ habitLogs }) => {
     };
 
     return (
-        <Card className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+        <Card className="p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                     {format(currentMonth, 'MMMM yyyy', { locale: fr })}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                     <button
                         onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1))}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="p-2 hover:bg-gray-100 rounded-lg flex-1 sm:flex-none"
                     >
                         ←
                     </button>
                     <button
                         onClick={() => setCurrentMonth(new Date())}
-                        className="p-2 hover:bg-gray-100 rounded-lg text-sm"
+                        className="p-2 hover:bg-gray-100 rounded-lg text-sm flex-1 sm:flex-none"
                     >
                         Aujourd'hui
                     </button>
                     <button
                         onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1))}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="p-2 hover:bg-gray-100 rounded-lg flex-1 sm:flex-none"
                     >
                         →
                     </button>
@@ -57,7 +57,7 @@ const HabitCalendar: React.FC<HabitCalendarProps> = ({ habitLogs }) => {
                 {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
                     <div
                         key={day}
-                        className="text-center text-sm font-medium text-gray-500 py-2"
+                        className="text-center text-xs sm:text-sm font-medium text-gray-500 py-1 sm:py-2"
                     >
                         {day}
                     </div>
@@ -77,17 +77,18 @@ const HabitCalendar: React.FC<HabitCalendarProps> = ({ habitLogs }) => {
                         <div
                             key={day.toISOString()}
                             className={`
-                aspect-square p-1
-                ${isToday ? 'border-2 border-violet-500' : ''}
-                rounded-lg
-              `}
+                                aspect-square p-0.5 sm:p-1
+                                ${isToday ? 'border-2 border-violet-500' : ''}
+                                rounded-lg
+                            `}
                         >
                             <div
                                 className={`
-                  w-full h-full rounded-lg flex items-center justify-center text-sm
-                  ${isCompleted ? 'bg-violet-500 text-white' : 'hover:bg-gray-50'}
-                  ${isToday && !isCompleted ? 'text-violet-500 font-medium' : ''}
-                `}
+                                    w-full h-full rounded-lg flex items-center justify-center
+                                    text-xs sm:text-sm
+                                    ${isCompleted ? 'bg-violet-500 text-white' : 'hover:bg-gray-50'}
+                                    ${isToday && !isCompleted ? 'text-violet-500 font-medium' : ''}
+                                `}
                             >
                                 {format(day, 'd')}
                             </div>
