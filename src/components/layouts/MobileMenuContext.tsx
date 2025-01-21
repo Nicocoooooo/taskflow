@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface MobileMenuContextType {
     isMobileMenuOpen: boolean;
@@ -8,7 +8,7 @@ interface MobileMenuContextType {
 
 const MobileMenuContext = createContext<MobileMenuContextType | undefined>(undefined);
 
-export function MobileMenuProvider({ children }: { children: ReactNode }) {
+export function MobileMenuProvider({ children }: { children: React.ReactNode }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -29,4 +29,4 @@ export function useMobileMenu() {
         throw new Error('useMobileMenu must be used within a MobileMenuProvider');
     }
     return context;
-}
+};

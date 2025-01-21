@@ -8,23 +8,25 @@ import EisenhowerView from './pages/tasks/EisenhowerView';
 import ObjectivesPage from './pages/objectives/index';
 import HabitsPage from './pages/habits/index';
 import StatsOverview from './pages/stats/index';
-
+import { MobileMenuProvider } from './components/layouts/MobileMenuContext';
 
 function App() {
   return (
     <Router>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/tasks/list" element={<ListView />} />
-          <Route path="/tasks/kanban" element={<KanbanView />} />
-          <Route path="/tasks/calendar" element={<CalendarView />} />
-          <Route path="/tasks/matrix" element={<EisenhowerView />} />
-          <Route path="/objectives" element={<ObjectivesPage />} />
-          <Route path="/habits" element={<HabitsPage />} />
-          <Route path="/stats" element={<StatsOverview />} />
-        </Routes>
-      </MainLayout>
+      <MobileMenuProvider>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/tasks/list" element={<ListView />} />
+            <Route path="/tasks/kanban" element={<KanbanView />} />
+            <Route path="/tasks/calendar" element={<CalendarView />} />
+            <Route path="/tasks/matrix" element={<EisenhowerView />} />
+            <Route path="/objectives" element={<ObjectivesPage />} />
+            <Route path="/habits" element={<HabitsPage />} />
+            <Route path="/stats" element={<StatsOverview />} />
+          </Routes>
+        </MainLayout>
+      </MobileMenuProvider>
     </Router>
   );
 }

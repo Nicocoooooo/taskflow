@@ -1,27 +1,22 @@
-import { useEffect } from 'react';
+import React from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { MobileMenuProvider, useMobileMenu } from './MobileMenuContext';
+import { useMobileMenu } from './MobileMenuContext';
 
 interface MainLayoutProps {
     children: React.ReactNode;
 }
 
-const MainLayoutContent = ({ children }: MainLayoutProps) => {
+const MainLayout = ({ children }: MainLayoutProps) => {
     const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
 
-    // Ferme le menu mobile lors du changement de route
-    useEffect(() => {
-        closeMobileMenu();
-    }, [location.pathname]);
-
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="h-screen bg-gray-50 flex flex-col">
             {/* Header fixe en haut */}
             <Header />
 
             {/* Layout principal avec sidebar et contenu */}
-            <div className="flex min-h-[calc(100vh-4rem)]">
+            <div className="flex flex-1 pt-16">
                 {/* Overlay pour mobile */}
                 {isMobileMenuOpen && (
                     <div
@@ -34,18 +29,12 @@ const MainLayoutContent = ({ children }: MainLayoutProps) => {
                 <Sidebar />
 
                 {/* Contenu principal avec défilement */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 w-full lg:ml-64">
+                <main className="flex-1 overflow-y-auto lg:ml-64">
                     {children}
                 </main>
             </div>
         </div>
     );
 };
-
-const MainLayout = (props: MainLayoutProps) => (
-    <MobileMenuProvider>
-        <MainLayoutContent {...props} />
-    </MobileMenuProvider>
-);
 
 export default MainLayout;

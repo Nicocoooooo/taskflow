@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, BarChart2, Clock, Plus, GripVertical } from 'lucide-react';
+import { Target, BarChart2, Clock, Plus, GripVertical, Trash2 } from 'lucide-react';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import {
@@ -47,10 +47,13 @@ const TabButton: React.FC<TabButtonProps> = ({ icon, label, isActive, onClick })
         variant={isActive ? 'secondary' : 'ghost'}
         size="sm"
         onClick={onClick}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 whitespace-nowrap"
     >
         {icon}
-        {label}
+        <span className="hidden sm:inline">{label}</span>
+        <span className="sm:hidden">
+            {label.split(' ')[0]} {/* Montre seulement le premier mot sur mobile */}
+        </span>
     </Button>
 );
 
@@ -97,8 +100,6 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
         setIsLoading(true);
         setError(null);
 
-        console.log("Données envoyées au serveur:", formData);
-
         try {
             await onSubmit(formData);
         } catch (err) {
@@ -135,25 +136,25 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
     };
 
     return (
-        <Card className="max-w-4xl mx-auto p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="max-w-4xl mx-auto p-4 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* En-tête */}
-                <div className="pb-6 border-b border-gray-200">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                <div className="pb-4 sm:pb-6 border-b border-gray-200">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
                         {objective ? 'Modifier l\'objectif' : 'Nouvel objectif'}
                     </h2>
 
-                    {/* Navigation des onglets */}
-                    <div className="flex gap-2">
+                    {/* Navigation par onglets */}
+                    <div className="flex flex-wrap sm:flex-nowrap overflow-x-auto pb-2 -mb-2 gap-2 scrollbar-hide">
                         <TabButton
                             icon={<Target className="w-4 h-4" />}
-                            label="Informations de base"
+                            label="Informations"
                             isActive={activeTab === 'basic'}
                             onClick={(e) => handleTabClick(e, 'basic')}
                         />
                         <TabButton
                             icon={<BarChart2 className="w-4 h-4" />}
-                            label="Méthode SMART"
+                            label="SMART"
                             isActive={activeTab === 'smart'}
                             onClick={(e) => handleTabClick(e, 'smart')}
                         />
@@ -168,18 +169,18 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
 
                 {/* Onglet : Informations de base */}
                 {activeTab === 'basic' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         <div className="space-y-4">
                             {/* Titre */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Titre
+                                    Titre *
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.title}
                                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                     placeholder="Nom de l'objectif"
                                     required
                                 />
@@ -193,22 +194,23 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                 <textarea
                                     value={formData.description}
                                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                     rows={3}
-                                    placeholder="Description détaillée de l'objectif"
+                                    placeholder="Description détaillée"
                                 />
                             </div>
 
                             {/* Type et Domaine */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Type
+                                        Type *
                                     </label>
                                     <select
                                         value={formData.type}
                                         onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as ObjectiveType }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        required
                                     >
                                         <option value="short_term">Court terme</option>
                                         <option value="medium_term">Moyen terme</option>
@@ -223,7 +225,7 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                     <select
                                         value={formData.domain_id}
                                         onChange={e => setFormData(prev => ({ ...prev, domain_id: Number(e.target.value) }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                     >
                                         <option value="">Sélectionnez un domaine</option>
                                         {domains.map(domain => (
@@ -236,7 +238,7 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                             </div>
 
                             {/* Date et Priorité */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Date d'échéance
@@ -245,18 +247,19 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                         type="date"
                                         value={formData.due_date}
                                         onChange={e => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Priorité
+                                        Priorité *
                                     </label>
                                     <select
                                         value={formData.priority}
                                         onChange={e => setFormData(prev => ({ ...prev, priority: Number(e.target.value) }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        required
                                     >
                                         <option value={1}>Basse</option>
                                         <option value={2}>Moyenne</option>
@@ -270,18 +273,18 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
 
                 {/* Onglet : Méthode SMART */}
                 {activeTab === 'smart' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         {/* Spécifique */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Spécifique (Que voulez-vous accomplir exactement ?)
+                                Spécifique
                             </label>
                             <textarea
                                 value={formData.smart_specific}
                                 onChange={e => setFormData(prev => ({ ...prev, smart_specific: e.target.value }))}
-                                className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                 rows={2}
-                                placeholder="Décrivez votre objectif de manière précise et détaillée"
+                                placeholder="Que voulez-vous accomplir exactement ?"
                             />
                         </div>
 
@@ -289,18 +292,18 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Mesurable (Comment mesurerez-vous le progrès ?)
+                                    Mesurable
                                 </label>
                                 <textarea
                                     value={formData.smart_measurable}
                                     onChange={e => setFormData(prev => ({ ...prev, smart_measurable: e.target.value }))}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                     rows={2}
-                                    placeholder="Définissez des critères quantifiables"
+                                    placeholder="Comment mesurerez-vous le progrès ?"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Valeur cible
@@ -309,8 +312,10 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                         type="number"
                                         value={formData.target_value}
                                         onChange={e => setFormData(prev => ({ ...prev, target_value: Number(e.target.value) }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                                        placeholder="Valeur à atteindre"
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        min="0"
+                                        step="any"
+                                        placeholder="Ex: 10"
                                     />
                                 </div>
 
@@ -322,39 +327,40 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                         type="text"
                                         value={formData.measurement_unit}
                                         onChange={e => setFormData(prev => ({ ...prev, measurement_unit: e.target.value }))}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                                        placeholder="ex: kg, km, heures..."
+                                        className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                        placeholder="Ex: kg, km, heures..."
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Atteignable */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Atteignable (Quelles ressources ou soutien avez-vous ?)
-                            </label>
-                            <textarea
-                                value={formData.smart_achievable}
-                                onChange={e => setFormData(prev => ({ ...prev, smart_achievable: e.target.value }))}
-                                className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                                rows={2}
-                                placeholder="Listez les moyens à votre disposition"
-                            />
-                        </div>
+                        {/* Atteignable et Réaliste */}
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Atteignable
+                                </label>
+                                <textarea
+                                    value={formData.smart_achievable}
+                                    onChange={e => setFormData(prev => ({ ...prev, smart_achievable: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    rows={2}
+                                    placeholder="Quelles ressources avez-vous pour y arriver ?"
+                                />
+                            </div>
 
-                        {/* Réaliste */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Réaliste (Est-ce aligné avec vos autres objectifs ?)
-                            </label>
-                            <textarea
-                                value={formData.smart_realistic}
-                                onChange={e => setFormData(prev => ({ ...prev, smart_realistic: e.target.value }))}
-                                className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                                rows={2}
-                                placeholder="Expliquez pourquoi cet objectif est réalisable"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Réaliste
+                                </label>
+                                <textarea
+                                    value={formData.smart_realistic}
+                                    onChange={e => setFormData(prev => ({ ...prev, smart_realistic: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    rows={2}
+                                    placeholder="Est-ce aligné avec vos autres objectifs ?"
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -362,16 +368,18 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                 {/* Onglet : Étapes */}
                 {activeTab === 'steps' && (
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-medium text-gray-900">Étapes à suivre</h3>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <h3 className="text-lg font-medium text-gray-900">
+                                Étapes à suivre
+                            </h3>
                             <Button
                                 type="button"
                                 variant="secondary"
                                 size="sm"
                                 onClick={handleAddStep}
-                                className="flex items-center gap-2"
+                                className="w-full sm:w-auto"
                             >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-4 h-4 mr-2" />
                                 Ajouter une étape
                             </Button>
                         </div>
@@ -380,10 +388,11 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                             {formData.steps?.map((step, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl group"
+                                    className="flex items-start gap-2 sm:gap-3 p-3 bg-gray-50 rounded-xl group relative"
                                 >
-                                    <GripVertical className="w-5 h-5 mt-2 text-gray-400 flex-shrink-0" />
-                                    <div className="flex-1 space-y-3">
+                                    <GripVertical className="w-5 h-5 mt-2 text-gray-400 flex-shrink-0 hidden sm:block" />
+
+                                    <div className="flex-1 space-y-2">
                                         <input
                                             type="text"
                                             value={step.title}
@@ -392,7 +401,7 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                                 newSteps[index] = { ...newSteps[index], title: e.target.value };
                                                 setFormData(prev => ({ ...prev, steps: newSteps }));
                                             }}
-                                            className="w-full px-3 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                            className="w-full px-3 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
                                             placeholder="Titre de l'étape"
                                         />
                                         <textarea
@@ -402,11 +411,12 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                                 newSteps[index] = { ...newSteps[index], description: e.target.value };
                                                 setFormData(prev => ({ ...prev, steps: newSteps }));
                                             }}
-                                            className="w-full px-3 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                            className="w-full px-3 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
                                             placeholder="Description de l'étape"
                                             rows={2}
                                         />
                                     </div>
+
                                     <Button
                                         type="button"
                                         variant="ghost"
@@ -414,14 +424,17 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                                         onClick={() => handleRemoveStep(index)}
                                         className="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                        <GripVertical className="w-4 h-4" />
+                                        <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
                             ))}
 
                             {formData.steps?.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    Aucune étape définie. Commencez par en ajouter une !
+                                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl">
+                                    <p className="text-sm">Aucune étape définie</p>
+                                    <p className="text-xs text-gray-400">
+                                        Commencez par ajouter une étape !
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -429,17 +442,27 @@ const EnhancedObjectiveForm: React.FC<EnhancedObjectiveFormProps> = ({
                 )}
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                    <Button type="button" variant="ghost" onClick={onCancel}>
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={onCancel}
+                        className="w-full sm:w-auto"
+                        disabled={isLoading}
+                    >
                         Annuler
                     </Button>
-                    <Button type="submit" isLoading={isLoading}>
+                    <Button
+                        type="submit"
+                        isLoading={isLoading}
+                        className="w-full sm:w-auto"
+                    >
                         {objective ? 'Mettre à jour' : 'Créer l\'objectif'}
                     </Button>
                 </div>
 
                 {error && (
-                    <div className="text-sm text-red-600 mt-2">
+                    <div className="text-sm text-red-600 mt-2 text-center sm:text-left">
                         {error}
                     </div>
                 )}
