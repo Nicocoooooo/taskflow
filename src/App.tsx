@@ -9,6 +9,8 @@ import ObjectivesPage from './pages/objectives/index';
 import HabitsPage from './pages/habits/index';
 import StatsOverview from './pages/stats/index';
 import { MobileMenuProvider } from './components/layouts/MobileMenuContext';
+import TradingDashboard from './pages/trading/index';
+
 
 function App() {
   return (
@@ -24,6 +26,9 @@ function App() {
             <Route path="/objectives" element={<ObjectivesPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/stats" element={<StatsOverview />} />
+            <Route path="/trading" element={<TradingDashboard />} />
+
+
           </Routes>
         </MainLayout>
       </MobileMenuProvider>

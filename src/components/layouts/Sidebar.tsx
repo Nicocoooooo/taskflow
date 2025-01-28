@@ -6,6 +6,7 @@ import {
     Target,
     History,
     BarChart2,
+    LineChart,
     X
 } from 'lucide-react';
 import { useMobileMenu } from './MobileMenuContext';
@@ -36,6 +37,11 @@ const navigation = [
         name: 'Habitudes',
         path: '/habits',
         icon: History
+    },
+    {
+        name: 'Trading',     // Nouvel élément
+        path: '/trading',
+        icon: LineChart
     },
     {
         name: 'Statistiques',
