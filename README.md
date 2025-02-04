@@ -48,3 +48,12 @@ export default tseslint.config({
   },
 })
 ```
+
+
+## Installation
+
+1. Clonez le repository
+2. Créez un fichier `.env` à la racine du projet basé sur `.env.example`
+3. Configurez vos variables d'environnement Supabase dans le fichier `.env`
+4. Installez les dépendances avec `npm install`
+5. Lancez le projet avec `npm run dev`
