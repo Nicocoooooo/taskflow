@@ -1,59 +1,86 @@
-# React + TypeScript + Vite
+# TaskFlow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Une application web personnelle de gestion des tâches et d'organisation, conçue pour maximiser la productivité avec une interface moderne et intuitive.
 
-Currently, two official plugins are available:
+## ✨ Caractéristiques
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📋 **Gestion complète des tâches** avec priorités, deadlines et catégories
+- 📊 **Vues multiples** : Kanban, Liste, Calendrier, Matrice d'Eisenhower
+- 🎯 **Système d'objectifs** avec suivi de progression
+- 🔄 **Gestion des habitudes** avec système de streaks
+- 📈 **Analyses et statistiques** détaillées
+- 🔍 **Recherche et filtres** avancés
+- 📱 **Interface responsive** et moderne
 
-## Expanding the ESLint configuration
+## 🚀 Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+1. Clonez le repository :
+```bash
+git clone https://github.com/Nicocooooo/taskflow.git
+cd taskflow
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+2. Installez les dépendances :
+```bash
+npm install
 ```
 
+3. Créez un fichier `.env` à la racine du projet :
+```bash
+cp .env.example .env
+```
 
-## Installation
+4. Configurez les variables d'environnement dans le fichier `.env` :
+```env
+VITE_SUPABASE_URL=votre_url_supabase
+VITE_SUPABASE_ANON_KEY=votre_cle_supabase
+```
 
-1. Clonez le repository
-2. Créez un fichier `.env` à la racine du projet basé sur `.env.example`
-3. Configurez vos variables d'environnement Supabase dans le fichier `.env`
-4. Installez les dépendances avec `npm install`
-5. Lancez le projet avec `npm run dev`
+5. Lancez l'application en mode développement :
+```bash
+npm run dev
+```
+
+## 🛠️ Technologies utilisées
+
+- **Frontend** : React.js avec TypeScript
+- **Styles** : Tailwind CSS
+- **Base de données** : Supabase (PostgreSQL)
+- **Hébergement** : Vercel
+- **Drag & Drop** : react-beautiful-dnd
+- **Graphiques** : recharts
+
+## 📚 Documentation
+
+La documentation complète du projet est disponible dans les fichiers suivants :
+
+- `cahier-charges.md` : Spécifications fonctionnelles détaillées
+- `charte-graphique.md` : Guide du design system
+- `documentation-base-de-donnee.md` : Structure de la base de données
+- `structure-code.md` : Organisation du code source
+
+## ⚙️ Scripts disponibles
+
+- `npm run dev` : Lance le serveur de développement
+- `npm run build` : Crée une version de production
+- `npm run preview` : Prévisualise la version de production
+- `npm run lint` : Vérifie le code avec ESLint
+
+## 🔒 Sécurité
+
+- Toutes les tables sont sécurisées avec Row Level Security (RLS)
+- Les clés d'API sensibles doivent rester confidentielles
+- L'authentification anonyme est activée pour l'accès public
+
+## 📝 Notes
+
+- L'application est conçue pour un usage personnel uniquement
+- Les sauvegardes sont automatiques via Supabase
+- Le déploiement est automatisé via Vercel à chaque push sur la branche main
+
+## 🔧 Support
+
+En cas de problèmes :
+- Base de données : Accédez au dashboard Supabase
+- Déploiement : Consultez le dashboard Vercel
+- Code : Créez une issue sur GitHub
