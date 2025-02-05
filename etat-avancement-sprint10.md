@@ -141,10 +141,23 @@ useTrades(): {
 }
 ```
 
+<<<<<<< HEAD
+=======
+### 7.2 Variables d'Environnement
+```env
+VITE_SUPABASE_URL=https://caqfsnsmydvkupaxgtsy.supabase.co
+VITE_SUPABASE_ANON_KEY=your_key_here
+```
+
+>>>>>>> afe369001651a82695c246cbb9e99cb25d5db22c
 ## 8. Documentation
 - Guide d'utilisation à créer
 - Documentation technique à compléter
 - Guide de déploiement à mettre à jour
 
 ## 9. Conclusion
+<<<<<<< HEAD
 Le sprint 10 a permis d'ajouter une fonctionnalité majeure à TaskFlow avec le module de trading. L'architecture mise en place permet une évolution future du système tout en maintenant la cohérence avec l'application existante.
+=======
+Le sprint 10 a permis d'ajouter une fonctionnalité majeure à TaskFlow avec le module de trading. L'architecture mise en place permet une évolution future du système tout en maintenant la cohérence avec l'application existante.
+>>>>>>> afe369001651a82695c246cbb9e99cb25d5db22c
