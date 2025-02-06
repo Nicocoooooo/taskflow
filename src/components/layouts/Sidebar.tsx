@@ -7,6 +7,7 @@ import {
     History,
     BarChart2,
     LineChart,
+    Dumbbell,
     X
 } from 'lucide-react';
 import { useMobileMenu } from './MobileMenuContext';
@@ -47,6 +48,16 @@ const navigation = [
         name: 'Statistiques',
         path: '/stats',
         icon: BarChart2
+    },
+    // Dans le tableau navigation de Sidebar.tsx, ajoutez :
+    {
+        name: 'Sport',
+        path: '/workout',
+        icon: Dumbbell,  // Importez Dumbbell de lucide-react
+        children: [
+            { name: 'Séances', path: '/workout' },
+            { name: 'Exercices', path: '/workout/exercises' }
+        ]
     }
 ];
 

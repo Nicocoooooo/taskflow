@@ -10,6 +10,9 @@ import HabitsPage from './pages/habits/index';
 import StatsOverview from './pages/stats/index';
 import { MobileMenuProvider } from './components/layouts/MobileMenuContext';
 import TradingDashboard from './pages/trading/index';
+import ExercisesView from './pages/workout/ExercisesView';
+import WorkoutIndexView from './pages/workout';
+import SessionView from './pages/workout/SessionView';
 
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/stats" element={<StatsOverview />} />
             <Route path="/trading" element={<TradingDashboard />} />
+            <Route path="/workout" element={<WorkoutIndexView />} />
+            <Route path="/workout/session/:id" element={<SessionView />} />
+            <Route path="/workout/exercises" element={<ExercisesView />} />
 
 
           </Routes>

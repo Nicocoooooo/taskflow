@@ -1,13 +1,22 @@
-// src/components/common/Modal.tsx
+import React from 'react';
+import { cn } from '../../utils/cn';
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
     title: string;
+    size?: 'sm' | 'md' | 'lg';
 }
 
-const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
+const Modal = ({ isOpen, onClose, children, title, size = 'md' }: ModalProps) => {
     if (!isOpen) return null;
+
+    const sizeClasses = {
+        sm: 'max-w-md',
+        md: 'max-w-2xl',
+        lg: 'max-w-4xl'
+    };
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -19,7 +28,10 @@ const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
                 />
 
                 {/* Modal */}
-                <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4">
+                <div className={cn(
+                    "relative bg-white rounded-xl shadow-xl w-full mx-4",
+                    sizeClasses[size]
+                )}>
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b">
                         <h2 className="text-lg font-semibold">{title}</h2>
