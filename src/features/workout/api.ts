@@ -190,3 +190,45 @@ export const fetchExerciseProgress = async (exerciseId: number): Promise<ApiResp
 
     return { data: formattedData, error: null };
 };
+
+// Dans features/workout/api.ts
+
+export const createExercise = async (exerciseData: Omit<Exercise, 'id' | 'created_at'>): Promise<ApiResponse<Exercise>> => {
+    const { data, error } = await supabase
+        .from('exercises')
+        .insert([exerciseData])
+        .select()
+        .single();
+
+    return { data, error };
+};
+
+export const updateExercise = async (id: number, exerciseData: Omit<Exercise, 'id' | 'created_at'>): Promise<ApiResponse<Exercise>> => {
+    const { data, error } = await supabase
+        .from('exercises')
+        .update(exerciseData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    return { data, error };
+};
+
+export const deleteExercise = async (id: number): Promise<ApiResponse<null>> => {
+    const { error } = await supabase
+        .from('exercises')
+        .delete()
+        .eq('id', id);
+
+    return { data: null, error };
+};
+
+export const fetchExercise = async (id: number): Promise<ApiResponse<Exercise>> => {
+    const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    return { data, error };
+};

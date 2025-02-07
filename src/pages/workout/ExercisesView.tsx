@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
-import { fetchWorkoutTypes, fetchExercises } from '../../features/workout/api';
+import {
+    fetchWorkoutTypes,
+    fetchExercises,
+    updateExercise,
+    createExercise,
+    deleteExercise
+} from '../../features/workout/api';
 import { WorkoutType, Exercise } from '../../features/workout/types';
+import ExerciseCreateForm from '../../components/workout/ExerciseCreateForm';
 
 const ExercisesView: React.FC = () => {
+    const navigate = useNavigate();
     // États
     const [workoutTypes, setWorkoutTypes] = useState<WorkoutType[]>([]);
     const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -14,6 +24,8 @@ const ExercisesView: React.FC = () => {
     const [showNewExerciseModal, setShowNewExerciseModal] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [loading, setLoading] = useState(true);
+    const [exerciseToDelete, setExerciseToDelete] = useState<Exercise | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Chargement initial
     useEffect(() => {
@@ -41,9 +53,25 @@ const ExercisesView: React.FC = () => {
         setShowNewExerciseModal(true);
     };
 
-    const handleEditExercise = (exercise: Exercise) => {
+    const handleEditExercise = (exercise: Exercise, e: React.MouseEvent) => {
+        e.stopPropagation(); // Empêche la navigation vers la vue détaillée
         setSelectedExercise(exercise);
         setShowNewExerciseModal(true);
+    };
+
+    const handleDeleteExercise = async (exercise: Exercise, e: React.MouseEvent) => {
+        e.stopPropagation(); // Empêche la navigation vers la vue détaillée
+        setExerciseToDelete(exercise);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!exerciseToDelete) return;
+
+        const { error } = await deleteExercise(exerciseToDelete.id);
+        if (!error) {
+            loadData();
+        }
     };
 
     if (loading) {
@@ -85,7 +113,11 @@ const ExercisesView: React.FC = () => {
             {/* Liste des exercices */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredExercises.map(exercise => (
-                    <Card key={exercise.id} className="hover:shadow-lg transition-shadow">
+                    <Card
+                        key={exercise.id}
+                        className="hover:shadow-lg transition-shadow cursor-pointer"
+                        onClick={() => navigate(`/workout/exercises/${exercise.id}`)}
+                    >
                         <div className="p-4">
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">
@@ -93,12 +125,13 @@ const ExercisesView: React.FC = () => {
                                 </h3>
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => handleEditExercise(exercise)}
+                                        onClick={(e) => handleEditExercise(exercise, e)}
                                         className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                                     >
                                         <Edit2 className="h-4 w-4 text-gray-500" />
                                     </button>
                                     <button
+                                        onClick={(e) => handleDeleteExercise(exercise, e)}
                                         className="p-1 hover:bg-red-50 rounded-lg transition-colors"
                                     >
                                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -135,11 +168,35 @@ const ExercisesView: React.FC = () => {
                 onClose={() => setShowNewExerciseModal(false)}
                 title={selectedExercise ? "Modifier l'exercice" : "Nouvel exercice"}
             >
-                {/* Form à implémenter */}
-                <div className="p-4">
-                    <p className="text-gray-500">Formulaire à implémenter</p>
-                </div>
+                <ExerciseCreateForm
+                    exercise={selectedExercise}
+                    onSubmit={async (data) => {
+                        if (selectedExercise) {
+                            const { error } = await updateExercise(selectedExercise.id, data);
+                            if (!error) {
+                                loadData();
+                                setShowNewExerciseModal(false);
+                            }
+                        } else {
+                            const { error } = await createExercise(data);
+                            if (!error) {
+                                loadData();
+                                setShowNewExerciseModal(false);
+                            }
+                        }
+                    }}
+                    onCancel={() => setShowNewExerciseModal(false)}
+                />
             </Modal>
+
+            {/* Modal de confirmation de suppression */}
+            <ConfirmDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={confirmDelete}
+                title="Supprimer l'exercice"
+                message={`Êtes-vous sûr de vouloir supprimer l'exercice "${exerciseToDelete?.name}" ? Cette action est irréversible.`}
+            />
         </div>
     );
 };

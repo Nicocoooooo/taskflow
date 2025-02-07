@@ -13,6 +13,7 @@ import TradingDashboard from './pages/trading/index';
 import ExercisesView from './pages/workout/ExercisesView';
 import WorkoutIndexView from './pages/workout';
 import SessionView from './pages/workout/SessionView';
+import ExerciseDetailView from './pages/workout/ExerciceDetailView';
 
 
 function App() {
@@ -33,7 +34,7 @@ function App() {
             <Route path="/workout" element={<WorkoutIndexView />} />
             <Route path="/workout/session/:id" element={<SessionView />} />
             <Route path="/workout/exercises" element={<ExercisesView />} />
-
+            <Route path="/workout/exercises/:id" element={<ExerciseDetailView />} />
 
           </Routes>
         </MainLayout>
